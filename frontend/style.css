@@ -170,34 +170,37 @@ h1 {
     margin: 15% auto;
     padding: 20px;
     border: 1px solid #888;
-    width: 50%;
-    max-width: 600px;
+    width: 80%;
+    max-width: 500px;
     border-radius: 8px;
     position: relative;
 }
 
-.close {
+.modal-content .close {
     color: #aaa;
-    float: right;
+    position: absolute;
+    right: 10px;
+    top: 5px;
     font-size: 28px;
     font-weight: bold;
     cursor: pointer;
 }
 
-.close:hover,
-.close:focus {
+.modal-content .close:hover,
+.modal-content .close:focus {
     color: black;
     text-decoration: none;
     cursor: pointer;
 }
 
 .modal-content h2 {
-    margin-bottom: 20px;
     text-align: center;
+    margin-bottom: 20px;
 }
 
-.modal-content input[type="text"] {
-    width: calc(100% - 20px);
+.modal-content input[type="text"],
+.modal-content select {
+    width: calc(100% - 22px);
     padding: 10px;
     margin-bottom: 15px;
     border: 1px solid #ddd;
@@ -212,51 +215,10 @@ h1 {
     padding: 10px 15px;
     border-radius: 4px;
     cursor: pointer;
-    margin-right: 10px;
-}
-
-.modal-content button:last-child {
-    margin-right: 0;
+    margin-right: 5px;
 }
 
 .modal-content button:hover {
-    background-color: #005f7a;
-}
-
-.modal-content form {
-    display: flex;
-    flex-direction: column;
-}
-
-.modal-content form label {
-    margin-bottom: 5px;
-    font-weight: bold;
-}
-
-.modal-content form input[type="text"] {
-    width: calc(100% - 20px);
-    padding: 10px;
-    margin-bottom: 15px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    box-sizing: border-box;
-}
-
-.modal-content form button {
-    background-color: #008CBA;
-    color: white;
-    border: none;
-    padding: 10px 15px;
-    border-radius: 4px;
-    cursor: pointer;
-    margin-right: 10px;
-}
-
-.modal-content form button:last-child {
-    margin-right: 0;
-}
-
-.modal-content form button:hover {
     background-color: #005f7a;
 }
 
