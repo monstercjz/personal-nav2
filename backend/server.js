@@ -9,6 +9,7 @@ const app = express();
 const port = 3000;
 
 app.use(cors());
+app.use('/api/icons', express.static(path.join(__dirname, 'icons')));
 app.use(bodyParser.json());
 
 const dataFilePath = 'data.json';

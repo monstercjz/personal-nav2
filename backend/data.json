@@ -1,62 +1,13 @@
 {
   "groups": [
     {
-      "id": 1736616528504,
-      "name": "121",
-      "websites": [
-        {
-          "id": 1736616528520,
-          "name": "1",
-          "url": "2",
-          "description": "3"
-        },
-        {
-          "id": 1736616531699,
-          "name": "1",
-          "url": "https://2222",
-          "description": "3"
-        },
-        {
-          "id": 1736617392198,
-          "name": "441231",
-          "url": "https://1231231",
-          "description": "12312"
-        },
-        {
-          "id": 1736617521699,
-          "name": "2312312",
-          "url": "https://231231",
-          "description": "1231231"
-        },
-        {
-          "id": 1736618673989,
-          "name": "2",
-          "url": "http://www.baidu.com",
-          "description": "3",
-          "iconPath": "/icons/1736618673988-hsw26r36p8u.ico"
-        },
-        {
-          "id": 1736619133326,
-          "name": "1",
-          "url": "https://192.168.3.3",
-          "description": "3",
-          "iconPath": null
-        }
-      ]
-    },
-    {
-      "id": 1736617507721,
-      "name": "1231",
-      "websites": []
-    },
-    {
       "id": 1736617528180,
-      "name": "21",
+      "name": "组1",
       "websites": [
         {
           "id": 1736618063345,
           "name": "1",
-          "url": "https://www.baidu.com",
+          "url": "https://www.taobao.com/",
           "description": "1",
           "iconPath": "/icons/1736618063345-ow6v66ew5m.ico"
         },
@@ -72,6 +23,32 @@
           "name": "1",
           "url": "https://google.com",
           "description": "2",
+          "iconPath": null
+        }
+      ]
+    },
+    {
+      "id": 1736625392988,
+      "name": "组2",
+      "websites": [
+        {
+          "id": 1736625943629,
+          "name": "百度",
+          "url": "https://www.baidu.com",
+          "description": "baidu",
+          "iconPath": "/icons/1736625943628-kz7w1n02s6.ico"
+        }
+      ]
+    },
+    {
+      "id": 1736625878870,
+      "name": "组3",
+      "websites": [
+        {
+          "id": 1736625878940,
+          "name": "2",
+          "url": "https://www.tianmao.com",
+          "description": "1",
           "iconPath": null
         }
       ]
