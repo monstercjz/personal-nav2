@@ -2,6 +2,8 @@ const express = require('express');
 const fs = require('fs');
 const bodyParser = require('body-parser');
 const cors = require('cors');
+const fetch = require('node-fetch');
+const path = require('path');
 
 const app = express();
 const port = 3000;
@@ -10,6 +12,12 @@ app.use(cors());
 app.use(bodyParser.json());
 
 const dataFilePath = 'data.json';
+
+// 创建 icons 文件夹
+const iconsDir = path.join(__dirname, 'icons');
+if (!fs.existsSync(iconsDir)) {
+    fs.mkdirSync(iconsDir);
+}
 
 // 读取数据
 function readData() {
@@ -25,6 +33,39 @@ function readData() {
 function writeData(data) {
     fs.writeFileSync(dataFilePath, JSON.stringify(data, null, 2));
 }
+
+// 获取 favicon 并保存
+async function fetchAndSaveFavicon(url) {
+    try {
+        const faviconUrl = new URL('/favicon.ico', url).href;
+        const response = await fetch(faviconUrl, { timeout: 5000 });
+        if (response.ok && response.headers.get('content-type')?.includes('image')) {
+            const buffer = await response.buffer();
+            const filename = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.ico`;
+            const filePath = path.join(iconsDir, filename);
+            fs.writeFileSync(filePath, buffer);
+            return `/icons/${filename}`;
+        }
+        return null;
+    } catch (error) {
+        console.error('Error fetching favicon:', error);
+        return null;
+    }
+}
+
+// 获取 favicon
+app.get('/api/favicon', async (req, res) => {
+    const { url } = req.query;
+    if (!url) {
+        return res.status(400).json({ error: 'URL is required' });
+    }
+    const iconPath = await fetchAndSaveFavicon(url);
+    if (iconPath) {
+        res.json({ iconPath });
+    } else {
+        res.status(404).json({ error: 'Favicon not found' });
+    }
+});
 
 // 获取所有数据
 app.get('/api/data', (req, res) => {
@@ -46,9 +87,9 @@ app.post('/api/groups', (req, res) => {
 });
 
 // 添加网站到分组
-app.post('/api/groups/:groupId/websites', (req, res) => {
+app.post('/api/groups/:groupId/websites', async (req, res) => {
     const { groupId } = req.params;
-    const { name, url } = req.body;
+    const { name, url, description } = req.body;
     if (!name || !url) {
         return res.status(400).json({ error: 'Website name and URL are required' });
     }
@@ -57,7 +98,8 @@ app.post('/api/groups/:groupId/websites', (req, res) => {
     if (!group) {
         return res.status(404).json({ error: 'Group not found' });
     }
-    const newWebsite = { id: Date.now(), name, url };
+    const iconPath = await fetchAndSaveFavicon(url);
+    const newWebsite = { id: Date.now(), name, url, description, iconPath };
     group.websites.push(newWebsite);
     writeData(data);
     res.status(201).json(newWebsite);
@@ -124,6 +166,7 @@ app.put('/api/groups/:groupId/websites/:websiteId', (req, res) => {
     res.json(website);
 });
 
+app.use('/icons', express.static(path.join(__dirname, 'icons')));
 app.listen(port, () => {
     console.log(`Server running on http://localhost:${port}`);
 }); 
