@@ -119,3 +119,19 @@ services:
     volumes:
       - ./backend:/app
 ```
+
+
+后端:
+使用 Express.js 创建 RESTful API。
+使用 fs 模块读写 JSON 文件存储数据。
+提供添加、删除、修改分组和网站的 API。
+使用 cors 中间件允许跨域请求。
+前端:
+使用纯 HTML, CSS 和 JavaScript 构建用户界面。
+通过 fetch API 与后端交互。
+动态渲染分组和网站列表。
+浏览器插件:
+使用 WebExtension API 创建浏览器插件。
+从后端获取数据并显示快捷链接。
+Docker:
+提供 Dockerfile 和 Docker Compose 文件，方便部署。
