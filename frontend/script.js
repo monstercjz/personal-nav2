@@ -21,6 +21,8 @@ function renderDashboard(data) {
     data.groups.forEach(group => {
         const groupDiv = document.createElement('div');
         groupDiv.classList.add('group');
+        groupDiv.setAttribute('draggable', true);
+        groupDiv.id = `group-${group.id}`;
         groupDiv.innerHTML = `
             <h2>
                 ${group.name}
@@ -56,6 +58,9 @@ function renderDashboard(data) {
                         <input type="text" id="modalEditWebsiteName-${group.id}-${website.id}" placeholder="New Website Name" value="${website.name}">
                         <input type="text" id="modalEditWebsiteUrl-${group.id}-${website.id}" placeholder="New Website URL" value="${website.url}">
                         <input type="text" id="modalEditWebsiteDescription-${group.id}-${website.id}" placeholder="New Website Description" value="${website.description}" >
+                        <select id="modalEditWebsiteGroup-${group.id}-${website.id}">
+                            <option value="">Select Group</option>
+                        </select>
                         <button onclick="saveModalWebsite(${group.id}, ${website.id})">Save</button>
                         <button onclick="closeModal('editWebsiteModal-${group.id}-${website.id}')">Cancel</button>
                     </div>
@@ -64,6 +69,48 @@ function renderDashboard(data) {
             websiteList.appendChild(websiteItem);
         });
     });
+}
+
+dashboard.addEventListener('dragstart', (e) => {
+    e.dataTransfer.setData('text/plain', e.target.id);
+});
+
+dashboard.addEventListener('dragover', (e) => {
+    e.preventDefault();
+});
+
+dashboard.addEventListener('drop', (e) => {
+    e.preventDefault();
+    const draggedGroupId = e.dataTransfer.getData('text/plain');
+    const targetGroup = e.target.closest('.group');
+    if (targetGroup && targetGroup.id !== draggedGroupId) {
+        const draggedGroup = document.getElementById(draggedGroupId);
+        const dashboard = document.getElementById('dashboard');
+        const draggedIndex = Array.from(dashboard.children).indexOf(draggedGroup);
+        const targetIndex = Array.from(dashboard.children).indexOf(targetGroup);
+        if (draggedIndex < targetIndex) {
+            dashboard.insertBefore(draggedGroup, targetGroup.nextSibling);
+        } else {
+            dashboard.insertBefore(draggedGroup, targetGroup);
+        }
+        saveGroupOrder();
+    }
+});
+
+async function saveGroupOrder() {
+    const groupElements = Array.from(document.querySelectorAll('.group'));
+    const groupIds = groupElements.map(group => parseInt(group.id.split('-')[1]));
+    const response = await fetch(`${backendUrl}/data`);
+    const data = await response.json();
+    const orderedGroups = groupIds.map(id => data.groups.find(group => group.id === id));
+    const updateResponse = await fetch(`${backendUrl}/groups/order`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ groups: orderedGroups })
+    });
+    if (!updateResponse.ok) {
+        alert('Failed to save group order.');
+    }
 }
 
 // 渲染分组下拉框
@@ -330,11 +377,28 @@ async function editWebsite(groupId, websiteId) {
     const modalEditWebsiteName = document.getElementById(`modalEditWebsiteName-${groupId}-${websiteId}`);
     const modalEditWebsiteUrl = document.getElementById(`modalEditWebsiteUrl-${groupId}-${websiteId}`);
     const modalEditWebsiteDescription = document.getElementById(`modalEditWebsiteDescription-${groupId}-${websiteId}`);
-    const websiteItem = document.querySelector(`.website-item:has(div[id^="editWebsiteModal-${groupId}-${websiteId}"])`);
-    const website = websiteItem.querySelector('a');
-    modalEditWebsiteName.value = website.textContent;
-    modalEditWebsiteUrl.value = website.href;
-    modalEditWebsiteDescription.value = websiteItem.querySelector('div[id^="editWebsiteModal-"] input[id^="modalEditWebsiteDescription-"]').value;
+    const modalEditWebsiteGroup = document.getElementById(`modalEditWebsiteGroup-${groupId}-${websiteId}`);
+    const websiteItem = document.querySelector(`.website-item:has(a[href="${modalEditWebsiteUrl.value}"])`);
+    const websiteUrl = websiteItem.querySelector('a').getAttribute('href');
+    const websiteName = websiteItem.querySelector('a').textContent;
+    const websiteDescription = websiteItem.querySelector('span').textContent;
+    modalEditWebsiteName.value = websiteName;
+    modalEditWebsiteUrl.value = websiteUrl;
+    modalEditWebsiteDescription.value = websiteDescription;
+    // 填充分组下拉框
+    if (!groupsData) {
+        await fetchAndRenderGroupSelect();
+    }
+    modalEditWebsiteGroup.innerHTML = '<option value="">Select Group</option>';
+    groupsData.groups.forEach(group => {
+        const option = document.createElement('option');
+        option.value = group.id;
+        option.textContent = group.name;
+        if (group.id == groupId) {
+            option.selected = true;
+        }
+        modalEditWebsiteGroup.appendChild(option);
+    });
 }
 
 // 保存网站
@@ -383,6 +447,7 @@ async function saveModalWebsite(groupId, websiteId) {
     const modalEditWebsiteName = document.getElementById(`modalEditWebsiteName-${groupId}-${websiteId}`).value;
     let modalEditWebsiteUrl = document.getElementById(`modalEditWebsiteUrl-${groupId}-${websiteId}`).value;
     const modalEditWebsiteDescription = document.getElementById(`modalEditWebsiteDescription-${groupId}-${websiteId}`).value;
+    const modalEditWebsiteGroup = document.getElementById(`modalEditWebsiteGroup-${groupId}-${websiteId}`).value;
 
     // URL 校验和补全
     const urlRegex = /^[^\s/$.?#].[^\s]*$/i;
@@ -394,21 +459,55 @@ async function saveModalWebsite(groupId, websiteId) {
         modalEditWebsiteUrl = 'https://' + modalEditWebsiteUrl;
     }
 
-    const response = await fetch(`${backendUrl}/groups/${groupId}/websites/${websiteId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: modalEditWebsiteName, url: modalEditWebsiteUrl, description: modalEditWebsiteDescription })
-    });
+    let updateGroupId = groupId;
+    if (modalEditWebsiteGroup && modalEditWebsiteGroup !== groupId) {
+        updateGroupId = modalEditWebsiteGroup;
+    }
+
+    let response;
+    if (updateGroupId !== groupId) {
+        // 先删除旧分组的网站
+        response = await fetch(`${backendUrl}/groups/${groupId}/websites/${websiteId}`, {
+            method: 'DELETE'
+        });
+        if (!response.ok) {
+            alert('Failed to move website.');
+            return;
+        }
+        // 再添加新分组的网站
+        response = await fetch(`${backendUrl}/groups/${updateGroupId}/websites`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: modalEditWebsiteName, url: modalEditWebsiteUrl, description: modalEditWebsiteDescription, iconPath: null })
+        });
+    } else {
+        response = await fetch(`${backendUrl}/groups/${updateGroupId}/websites/${websiteId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: modalEditWebsiteName, url: modalEditWebsiteUrl, description: modalEditWebsiteDescription, groupId: updateGroupId })
+        });
+    }
+
     if (response.ok) {
         // 重新获取图标
         const iconResponse = await fetch(`${backendUrl}/favicon?url=${modalEditWebsiteUrl}`);
         if (iconResponse.ok) {
             const iconData = await iconResponse.json();
-            const updateResponse = await fetch(`${backendUrl}/groups/${groupId}/websites/${websiteId}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name: modalEditWebsiteName, url: modalEditWebsiteUrl, description: modalEditWebsiteDescription, iconPath: iconData.iconPath })
-            });
+            let updateResponse;
+            if (updateGroupId !== groupId) {
+                const data = await response.json();
+                updateResponse = await fetch(`${backendUrl}/groups/${updateGroupId}/websites/${data.id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: modalEditWebsiteName, url: modalEditWebsiteUrl, description: modalEditWebsiteDescription, iconPath: iconData.iconPath, groupId: updateGroupId })
+                });
+            } else {
+                updateResponse = await fetch(`${backendUrl}/groups/${updateGroupId}/websites/${websiteId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: modalEditWebsiteName, url: modalEditWebsiteUrl, description: modalEditWebsiteDescription, iconPath: iconData.iconPath, groupId: updateGroupId })
+                });
+            }
         }
         fetchDataAndRender();
         modal.style.display = 'none';

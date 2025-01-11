@@ -7,41 +7,38 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
-        <h1>Personal Dashboard</h1>
-        <div id="dashboard">
-            <!-- Groups and websites will be rendered here -->
+    <h1>Personal Dashboard</h1>
+    <div class="add-buttons" style="display:none;">
+        <button id="showAddGroup" >Add Group</button>
+        <button id="showAddWebsite">Add Website</button>
+    </div>
+    <div class="add-button-container">
+        <button id="toggleAddButtons">+</button>
+    </div>
+    <div class="modal" id="addGroupModal" style="display:none;">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('addGroupModal')">&times;</span>
+            <h2>Add Group</h2>
+            <input type="text" id="newGroupName" placeholder="New Group Name">
+            <button onclick="addGroup()">Add Group</button>
+            <button onclick="closeModal('addGroupModal')">Cancel</button>
         </div>
-        <div class="add-buttons" style="display:none;">
-            <button id="showAddGroup" >Add Group</button>
-            <button id="showAddWebsite">Add Website</button>
+    </div>
+    <div class="modal" id="addWebsiteModal" style="display:none;">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('addWebsiteModal')">&times;</span>
+            <h2>Add Website</h2>
+            <input type="text" id="newWebsiteName" placeholder="Website Name">
+            <input type="text" id="newWebsiteUrl" placeholder="Website URL">
+            <input type="text" id="newWebsiteDescription" placeholder="Website Description">
+            <select id="groupSelect">
+                <option value="">Select Group</option>
+            </select>
+            <button onclick="addWebsite()">Add Website</button>
+            <button onclick="closeModal('addWebsiteModal')">Cancel</button>
         </div>
-        <div class="add-button-container">
-            <button id="toggleAddButtons">+</button>
-        </div>
-        <div class="modal" id="addGroupModal" style="display:none;">
-            <div class="modal-content">
-                <span class="close" onclick="closeModal('addGroupModal')">&times;</span>
-                <h2>Add Group</h2>
-                <input type="text" id="newGroupName" placeholder="New Group Name">
-                <button onclick="addGroup()">Add Group</button>
-                <button onclick="closeModal('addGroupModal')">Cancel</button>
-            </div>
-        </div>
-        <div class="modal" id="addWebsiteModal" style="display:none;">
-            <div class="modal-content">
-                <span class="close" onclick="closeModal('addWebsiteModal')">&times;</span>
-                <h2>Add Website</h2>
-                <input type="text" id="newWebsiteName" placeholder="Website Name">
-                <input type="text" id="newWebsiteUrl" placeholder="Website URL">
-                <input type="text" id="newWebsiteDescription" placeholder="Website Description">
-                <select id="groupSelect">
-                    <option value="">Select Group</option>
-                </select>
-                <button onclick="addWebsite()">Add Website</button>
-                <button onclick="closeModal('addWebsiteModal')">Cancel</button>
-            </div>
-        </div>
+    </div>
+    <div id="dashboard" class="group-container">
     </div>
     <script src="script.js"></script>
 </body>

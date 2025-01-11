@@ -19,11 +19,18 @@
           "iconPath": null
         },
         {
-          "id": 1736619322874,
-          "name": "1",
-          "url": "https://google.com",
-          "description": "2",
-          "iconPath": null
+          "id": 1736628728891,
+          "name": "知乎",
+          "url": "https://zhihu.com",
+          "description": "zhihu",
+          "iconPath": "/icons/1736628728890-g9vipwnwnds.ico"
+        },
+        {
+          "id": 1736633446858,
+          "name": "淘宝",
+          "url": "https://taobao.com",
+          "description": "/icons/1736633037951-xxqnptsd84.ico",
+          "iconPath": "/icons/1736633447023-8iap3nqry5l.ico"
         }
       ]
     },
@@ -48,8 +55,41 @@
           "id": 1736625878940,
           "name": "2",
           "url": "https://www.tianmao.com",
-          "description": "1",
+          "description": "null",
           "iconPath": null
+        }
+      ]
+    },
+    {
+      "id": 1736628644054,
+      "name": "组4",
+      "websites": [
+        {
+          "id": 1736628688214,
+          "name": "天龙",
+          "url": "https://tl.changyou.com",
+          "description": "1",
+          "iconPath": "/icons/1736628688213-6lloeh25uxb.ico"
+        },
+        {
+          "id": 1736633953513,
+          "name": "1",
+          "url": "https://google.com",
+          "description": "null",
+          "iconPath": null
+        }
+      ]
+    },
+    {
+      "id": 1736628653086,
+      "name": "组5",
+      "websites": [
+        {
+          "id": 1736628707903,
+          "name": "qq",
+          "url": "https://qq.com",
+          "description": "/icons/1736628707902-z3it313luwr.ico",
+          "iconPath": "/icons/1736628707902-z3it313luwr.ico"
         }
       ]
     }

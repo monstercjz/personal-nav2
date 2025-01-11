@@ -148,7 +148,7 @@ app.put('/api/groups/:groupId', (req, res) => {
 // 修改网站
 app.put('/api/groups/:groupId/websites/:websiteId', (req, res) => {
     const { groupId, websiteId } = req.params;
-    const { name, url } = req.body;
+    const { name, url, description, iconPath, groupId: newGroupId } = req.body;
     if (!name || !url) {
         return res.status(400).json({ error: 'Website name and URL are required' });
     }
@@ -163,8 +163,23 @@ app.put('/api/groups/:groupId/websites/:websiteId', (req, res) => {
     }
     website.name = name;
     website.url = url;
+    website.description = description;
+    if (iconPath) {
+        website.iconPath = iconPath;
+    }
     writeData(data);
     res.json(website);
+});
+
+app.put('/api/groups/order', (req, res) => {
+    const { groups } = req.body;
+    if (!groups) {
+        return res.status(400).json({ error: 'Groups are required' });
+    }
+    const data = readData();
+    data.groups = groups;
+    writeData(data);
+    res.json(data);
 });
 
 app.use('/icons', express.static(path.join(__dirname, 'icons')));
