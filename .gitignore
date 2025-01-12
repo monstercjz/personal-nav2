@@ -9,12 +9,13 @@ yarn-error.log*
 # Dependency directories
 /frontend/node_modules/
 /backend/node_modules/
+/backend/icons/
+/backend/data.json
 
 # Build directories
 /frontend/build/
 /backend/build/
-/backend/icons/
-/backend/data.json
+
 
 # IDE and editor files
 .idea/
