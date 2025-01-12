@@ -335,8 +335,10 @@ function validateAndCompleteUrl(url) {
 
 // 获取图标函数
 async function fetchIcon(url) {
+    console.log('url2', url);
     const iconResponse = await fetch(`${backendUrl}/favicon?url=${url}`);
     if (iconResponse.ok) {
+        console.log('iconResponse', iconResponse);
         return await iconResponse.json();
     }
     return null;
@@ -430,9 +432,11 @@ async function saveModalWebsite() {
     if (modalEditWebsiteGroup && modalEditWebsiteGroup !== groupId) {
         updateGroupId = modalEditWebsiteGroup;
     }
-
+    console.log('updateGroupId', updateGroupId);
+    console.log('groupId', groupId);
     let response;
-    if (updateGroupId !== groupId) {
+    if (parseInt(updateGroupId) !== groupId) {
+        console.log('标记删除旧分组');
         // 先删除旧分组的网站
         response = await fetch(`${backendUrl}/groups/${groupId}/websites/${websiteId}`, {
             method: 'DELETE'
@@ -442,12 +446,14 @@ async function saveModalWebsite() {
             return;
         }
         // 再添加新分组的网站
+        console.log('标记添加新分组');
         response = await fetch(`${backendUrl}/groups/${updateGroupId}/websites`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ name: modalEditWebsiteName, url: modalEditWebsiteUrl, description: modalEditWebsiteDescription, iconPath: null })
         });
     } else {
+        console.log('标记修改网页');
         response = await fetch(`${backendUrl}/groups/${updateGroupId}/websites/${websiteId}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
@@ -457,9 +463,10 @@ async function saveModalWebsite() {
 
     if (response.ok) {
         const iconData = await fetchIcon(modalEditWebsiteUrl);
+        console.log('iconData', iconData);
         if (iconData) {
             let updateResponse;
-            if (updateGroupId !== groupId) {
+            if (parseInt(updateGroupId) !== groupId) {
                 const data = await response.json();
                 updateResponse = await fetch(`${backendUrl}/groups/${updateGroupId}/websites/${data.id}`, {
                     method: 'PUT',

@@ -23,6 +23,7 @@ if (!fs.existsSync(iconsDir)) {
 async function fetchAndSaveFavicon(url) {
     try {
         const faviconUrl = new URL('/favicon.ico', url).href;
+        console.log('faviconUrl', faviconUrl);
         const response = await fetch(faviconUrl, { timeout: 5000 });
         if (response.ok && response.headers.get('content-type')?.includes('image')) {
             const buffer = await response.buffer();
@@ -42,6 +43,7 @@ async function fetchAndSaveFavicon(url) {
 // 获取 favicon
 app.get('/api/favicon', async (req, res) => {
     const { url } = req.query;
+    console.log('url1', url);
     if (!url) {
         return res.status(400).json({ error: 'URL is required' });
     }
@@ -95,6 +97,7 @@ app.post('/api/groups', (req, res) => {
 
 // 添加网站到分组
 app.post('/api/groups/:groupId/websites', async (req, res) => {
+    console.log('标记添加网站到分组');
     try {
         const { groupId } = req.params;
         const { name, url, description } = req.body;
@@ -117,8 +120,9 @@ app.post('/api/groups/:groupId/websites', async (req, res) => {
     }
 });
 
-// 删除分组
+// 删除网页
 app.delete('/api/groups/:groupId/websites/:websiteId', (req, res) => {
+    console.log('标记删除网页');
     try {
         const { groupId, websiteId } = req.params;
         const data = readData();
@@ -137,6 +141,7 @@ app.delete('/api/groups/:groupId/websites/:websiteId', (req, res) => {
 
 // 删除分组
 app.delete('/api/groups/:groupId', (req, res) => {
+    console.log('标记删除分组');
     try {
         const { groupId } = req.params;
         const data = readData();
@@ -149,8 +154,9 @@ app.delete('/api/groups/:groupId', (req, res) => {
     }
 });
 
-// 修改分组
+// 修改网页
 app.put('/api/groups/:groupId/websites/:websiteId', (req, res) => {
+    console.log('标记修改网页');
     try {
         const { groupId, websiteId } = req.params;
         const { name, url, description, iconPath, groupId: newGroupId } = req.body;
@@ -182,6 +188,7 @@ app.put('/api/groups/:groupId/websites/:websiteId', (req, res) => {
 
 // 修改分组
 app.put('/api/groups/:groupId', (req, res) => {
+    console.log('标记修改分组');
     try {
         const { groupId } = req.params;
         const { name } = req.body;
