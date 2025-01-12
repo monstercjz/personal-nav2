@@ -1,19 +1,6 @@
 {
   "groups": [
     {
-      "id": 1736625878870,
-      "name": "组3",
-      "websites": [
-        {
-          "id": 1736625878940,
-          "name": "2",
-          "url": "https://www.tianmao.com",
-          "description": "null",
-          "iconPath": null
-        }
-      ]
-    },
-    {
       "id": 1736625392988,
       "name": "组2",
       "websites": [
@@ -30,6 +17,19 @@
           "url": "https://163.com",
           "description": "null",
           "iconPath": "/icons/1736684716630-382ayijoqav.ico"
+        }
+      ]
+    },
+    {
+      "id": 1736625878870,
+      "name": "组3",
+      "websites": [
+        {
+          "id": 1736625878940,
+          "name": "2",
+          "url": "https://www.tianmao.com",
+          "description": "null",
+          "iconPath": null
         }
       ]
     },

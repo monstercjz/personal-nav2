@@ -10,14 +10,20 @@ const showAddWebsite = document.getElementById('showAddWebsite');
 
 // 获取数据并渲染
 async function fetchDataAndRender() {
-    const response = await fetch(`${backendUrl}/data`);
-    const data = await response.json();
-    renderDashboard(data);
+    try {
+        const response = await fetch(`${backendUrl}/data`);
+        const data = await response.json();
+        renderDashboard(data);
+    } catch (error) {
+        console.error('Failed to fetch data:', error);
+        alert('Failed to load data. Please check the console for details.');
+    }
 }
 
 // 渲染仪表盘
 function renderDashboard(data) {
     dashboard.innerHTML = '';
+    const fragment = document.createDocumentFragment(); // 创建一个文档片段
     data.groups.forEach(group => {
         const groupDiv = document.createElement('div');
         groupDiv.classList.add('group');
@@ -31,8 +37,9 @@ function renderDashboard(data) {
             </h2>
             <div class="website-list" id="website-list-${group.id}"></div>
         `;
-        dashboard.appendChild(groupDiv);
-        const websiteList = document.getElementById(`website-list-${group.id}`);
+        const websiteList = document.createElement('div');
+        websiteList.classList.add('website-list');
+        websiteList.id = `website-list-${group.id}`;
         group.websites.forEach(website => {
             const websiteItem = document.createElement('div');
             websiteItem.classList.add('website-item');
@@ -44,16 +51,19 @@ function renderDashboard(data) {
             `;
             websiteList.appendChild(websiteItem);
         });
+        groupDiv.appendChild(websiteList);
+        fragment.appendChild(groupDiv); // 将 groupDiv 添加到文档片段
     });
+    dashboard.appendChild(fragment); // 将文档片段添加到 dashboard
 }
 
 dashboard.addEventListener('dragstart', (e) => {
-    // 检查点击的元素是否是输入框
-    if (e.target.tagName === 'INPUT') {
-        e.preventDefault(); // 如果是输入框，则阻止拖拽事件
+    if (!e.target.closest('.group')) {
+        e.preventDefault();
         return;
     }
-    e.dataTransfer.setData('text/plain', e.target.id);
+    e.stopPropagation(); // 阻止事件冒泡
+    e.dataTransfer.setData('text/plain', e.target.closest('.group').id);
 });
 
 dashboard.addEventListener('dragover', (e) => {
@@ -64,6 +74,7 @@ dashboard.addEventListener('drop', (e) => {
     e.preventDefault();
     const draggedGroupId = e.dataTransfer.getData('text/plain');
     const targetGroup = e.target.closest('.group');
+    if (!targetGroup) return; // 避免在非 .group 元素上触发拖拽
     if (targetGroup && targetGroup.id !== draggedGroupId) {
         const draggedGroup = document.getElementById(draggedGroupId);
         const dashboard = document.getElementById('dashboard');
@@ -79,8 +90,8 @@ dashboard.addEventListener('drop', (e) => {
 });
 
 async function saveGroupOrder() {
-    const groupElements = Array.from(document.querySelectorAll('.group'));
-    const groupIds = groupElements.map(group => parseInt(group.id.split('-')[1]));
+    const groupIds = Array.from(document.querySelectorAll('.group'))
+        .map(group => parseInt(group.id.split('-')[1]));
     const response = await fetch(`${backendUrl}/data`);
     const data = await response.json();
     const orderedGroups = groupIds.map(id => data.groups.find(group => group.id === id));
@@ -97,19 +108,26 @@ async function saveGroupOrder() {
 // 渲染分组下拉框
 function renderGroupSelect(data) {
     groupSelect.innerHTML = '<option value="">Select Group</option>';
+    const fragment = document.createDocumentFragment();
     data.groups.forEach(group => {
         const option = document.createElement('option');
         option.value = group.id;
         option.textContent = group.name;
-        groupSelect.appendChild(option);
+        fragment.appendChild(option);
     });
+    groupSelect.appendChild(fragment);
 }
 
 // 获取分组数据并渲染下拉框
 async function fetchAndRenderGroupSelect() {
-    const response = await fetch(`${backendUrl}/data`);
-    groupsData = await response.json();
-    renderGroupSelect(groupsData);
+    try {
+        const response = await fetch(`${backendUrl}/data`);
+        groupsData = await response.json();
+        renderGroupSelect(groupsData);
+    } catch (error) {
+        console.error('Failed to fetch group data:', error);
+        alert('Failed to load group data. Please check the console for details.');
+    }
 }
 
 // 添加分组
@@ -143,14 +161,9 @@ async function addWebsite() {
     const newWebsiteDescription = document.getElementById('newWebsiteDescription').value;
     const selectedGroupId = groupSelect.value;
 
-    // URL 校验和补全
-    const urlRegex = /^[^\s/$.?#].[^\s]*$/i;
-    if (!urlRegex.test(newWebsiteUrl)) {
-        alert('Please enter a valid URL.');
+    newWebsiteUrl = validateAndCompleteUrl(newWebsiteUrl);
+    if (!newWebsiteUrl) {
         return;
-    }
-    if (!newWebsiteUrl.startsWith('https://') && !newWebsiteUrl.startsWith('http://')) {
-        newWebsiteUrl = 'https://' + newWebsiteUrl;
     }
 
     if (!newWebsiteName || !newWebsiteUrl || !newWebsiteDescription) {
@@ -173,13 +186,12 @@ async function addWebsite() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name: 'Default' })
             });
-            if (createGroupResponse.ok) {
-                defaultGroup = await createGroupResponse.json();
-                groupId = defaultGroup.id;
-            } else {
+            if (!createGroupResponse.ok) {
                 alert('Failed to create default group.');
                 return;
             }
+            defaultGroup = await createGroupResponse.json();
+            groupId = defaultGroup.id;
         } else {
             groupId = defaultGroup.id;
         }
@@ -195,7 +207,6 @@ async function addWebsite() {
         document.getElementById('newWebsiteName').value = '';
         document.getElementById('newWebsiteUrl').value = '';
         document.getElementById('newWebsiteDescription').value = '';
-        // 清空下拉框
         groupSelect.value = '';
         closeModal('addWebsiteModal');
     } else {
@@ -246,7 +257,7 @@ groupSelect.addEventListener('click', () => {
 fetchDataAndRender();
 
 // 右键菜单事件监听器
-document.addEventListener('contextmenu', function (e) {
+dashboard.addEventListener('contextmenu', function (e) {
     const target = e.target;
     hideContextMenu();
     if (target.closest('.group h2')) {
@@ -267,32 +278,33 @@ document.addEventListener('contextmenu', function (e) {
     }
 });
 
-// 显示分组右键菜单
-function showGroupContextMenu(e, groupId) {
+// 创建右键菜单
+function createContextMenu(e, menuItems) {
     const menu = document.createElement('div');
     menu.id = 'contextMenu';
     menu.style.left = `${e.pageX}px`;
     menu.style.top = `${e.pageY}px`;
-    menu.innerHTML = `
-        <div onclick="editGroup(${groupId})">编辑分组</div>
-        <div onclick="deleteGroup(${groupId})" >删除分组</div>
-    `;
+    menu.innerHTML = menuItems.join('');
     document.body.appendChild(menu);
     document.addEventListener('click', hideContextMenu);
 }
 
+// 显示分组右键菜单
+function showGroupContextMenu(e, groupId) {
+    const menuItems = [
+        `<div onclick="editGroup(${groupId})">编辑分组</div>`,
+        `<div onclick="deleteGroup(${groupId})" >删除分组</div>`
+    ];
+    createContextMenu(e, menuItems);
+}
+
 // 显示网站右键菜单
 function showWebsiteContextMenu(e, groupId, websiteId) {
-    const menu = document.createElement('div');
-    menu.id = 'contextMenu';
-    menu.style.left = `${e.pageX}px`;
-    menu.style.top = `${e.pageY}px`;
-    menu.innerHTML = `
-        <div onclick="editWebsite(${groupId}, ${websiteId})">编辑网站</div>
-        <div onclick="deleteWebsite(${groupId}, ${websiteId})" >删除网站</div>
-    `;
-    document.body.appendChild(menu);
-    document.addEventListener('click', hideContextMenu);
+    const menuItems = [
+        `<div onclick="editWebsite(${groupId}, ${websiteId})">编辑网站</div>`,
+        `<div onclick="deleteWebsite(${groupId}, ${websiteId})" >删除网站</div>`
+    ];
+    createContextMenu(e, menuItems);
 }
 
 // 编辑分组
@@ -306,6 +318,28 @@ async function editGroup(groupId) {
     const groupDiv = document.querySelector(`.group:has(h2 input[id^="editGroupName-${groupId}"])`);
     const editInput = groupDiv.querySelector(`#editGroupName-${groupId}`);
     modalEditGroupName.value = editInput.value;
+}
+
+// URL 校验和补全函数
+function validateAndCompleteUrl(url) {
+    const urlRegex = /^[^\s/$.?#].[^\s]*$/i;
+    if (!urlRegex.test(url)) {
+        alert('Please enter a valid URL.');
+        return null;
+    }
+    if (!url.startsWith('https://') && !url.startsWith('http://')) {
+        return 'https://' + url;
+    }
+    return url;
+}
+
+// 获取图标函数
+async function fetchIcon(url) {
+    const iconResponse = await fetch(`${backendUrl}/favicon?url=${url}`);
+    if (iconResponse.ok) {
+        return await iconResponse.json();
+    }
+    return null;
 }
 
 // 保存分组
@@ -334,6 +368,15 @@ async function saveModalGroup() {
     }
 }
 
+// 获取网站信息
+function getWebsiteInfo(websiteId) {
+    const websiteItem = document.querySelector(`.website-item a[href*="websiteId=${websiteId}"]`).closest('.website-item');
+    const websiteUrl = websiteItem.querySelector('a').getAttribute('href').split('?')[0];
+    const websiteName = websiteItem.querySelector('a').textContent;
+    const websiteDescription = websiteItem.getAttribute('data-description');
+    return { websiteName, websiteUrl, websiteDescription };
+}
+
 // 编辑网站
 let currentEditWebsiteGroupId = null;
 let currentEditWebsiteId = null;
@@ -347,10 +390,7 @@ async function editWebsite(groupId, websiteId) {
     const modalEditWebsiteUrl = document.getElementById('modalEditWebsiteUrl');
     const modalEditWebsiteDescription = document.getElementById('modalEditWebsiteDescription');
     const modalEditWebsiteGroup = document.getElementById('modalEditWebsiteGroup');
-    const websiteItem = document.querySelector(`.website-item a[href*="websiteId=${websiteId}"]`).closest('.website-item');
-    const websiteUrl = websiteItem.querySelector('a').getAttribute('href').split('?')[0];
-    const websiteName = websiteItem.querySelector('a').textContent;
-    const websiteDescription = websiteItem.getAttribute('data-description');
+    const { websiteName, websiteUrl, websiteDescription } = getWebsiteInfo(websiteId);
     modalEditWebsiteName.value = websiteName;
     modalEditWebsiteUrl.value = websiteUrl;
     modalEditWebsiteDescription.value = websiteDescription;
@@ -381,14 +421,9 @@ async function saveModalWebsite() {
     const modalEditWebsiteDescription = document.getElementById('modalEditWebsiteDescription').value;
     const modalEditWebsiteGroup = document.getElementById('modalEditWebsiteGroup').value;
 
-    // URL 校验和补全
-    const urlRegex = /^[^\s/$.?#].[^\s]*$/i;
-    if (!urlRegex.test(modalEditWebsiteUrl)) {
-        alert('Please enter a valid URL.');
+    modalEditWebsiteUrl = validateAndCompleteUrl(modalEditWebsiteUrl);
+    if (!modalEditWebsiteUrl) {
         return;
-    }
-    if (!modalEditWebsiteUrl.startsWith('https://') && !modalEditWebsiteUrl.startsWith('http://')) {
-        modalEditWebsiteUrl = 'https://' + modalEditWebsiteUrl;
     }
 
     let updateGroupId = groupId;
@@ -421,10 +456,8 @@ async function saveModalWebsite() {
     }
 
     if (response.ok) {
-        // 重新获取图标
-        const iconResponse = await fetch(`${backendUrl}/favicon?url=${modalEditWebsiteUrl}`);
-        if (iconResponse.ok) {
-            const iconData = await iconResponse.json();
+        const iconData = await fetchIcon(modalEditWebsiteUrl);
+        if (iconData) {
             let updateResponse;
             if (updateGroupId !== groupId) {
                 const data = await response.json();

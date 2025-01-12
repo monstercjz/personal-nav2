@@ -10,6 +10,12 @@ h1 {
     background-color: #f0f0f0;
 }
 
+#dashboard {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+}
+
 .group {
     border: 1px solid #ddd;
     margin-bottom: 15px;
@@ -278,4 +284,30 @@ h1 {
     gap: 10px;
     max-width: 1200px;
     margin: 0 auto;
+}
+
+/* 媒体查询，当屏幕宽度小于 900px 时，每行显示 2 个分组 */
+@media (max-width: 900px) {
+    .group {
+        width: calc(50% - 10px);
+    }
+    .website-item {
+        width: calc(50% - 10px);
+    }
+    .website-item:not(:nth-child(2n)) {
+        margin-right: 10px;
+    }
+}
+
+/* 媒体查询，当屏幕宽度小于 600px 时，每行显示 1 个分组 */
+@media (max-width: 600px) {
+    .group {
+        width: calc(100% - 10px);
+    }
+    .website-item {
+        width: calc(100% - 10px);
+    }
+    .website-item:not(:nth-child(1n)) {
+        margin-right: 0;
+    }
 } 

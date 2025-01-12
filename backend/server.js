@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const fetch = require('node-fetch');
 const path = require('path');
+const { readData, writeData } = require('./data');
 
 const app = express();
 const port = 3000;
@@ -12,27 +13,10 @@ app.use(cors());
 app.use('/api/icons', express.static(path.join(__dirname, 'icons')));
 app.use(bodyParser.json());
 
-const dataFilePath = 'data.json';
-
 // 创建 icons 文件夹
 const iconsDir = path.join(__dirname, 'icons');
 if (!fs.existsSync(iconsDir)) {
     fs.mkdirSync(iconsDir);
-}
-
-// 读取数据
-function readData() {
-    try {
-        const data = fs.readFileSync(dataFilePath, 'utf8');
-        return JSON.parse(data);
-    } catch (err) {
-        return { groups: [] };
-    }
-}
-
-// 写入数据
-function writeData(data) {
-    fs.writeFileSync(dataFilePath, JSON.stringify(data, null, 2));
 }
 
 // 获取 favicon 并保存
@@ -47,6 +31,7 @@ async function fetchAndSaveFavicon(url) {
             fs.writeFileSync(filePath, buffer);
             return `/icons/${filename}`;
         }
+        console.log(`Favicon not found for ${url}`);
         return null;
     } catch (error) {
         console.error('Error fetching favicon:', error);
@@ -70,8 +55,13 @@ app.get('/api/favicon', async (req, res) => {
 
 // 获取所有数据
 app.get('/api/data', (req, res) => {
-    const data = readData();
-    res.json(data);
+    try {
+        const data = readData();
+        res.json(data);
+    } catch (error) {
+        console.error('Error getting data:', error);
+        res.status(500).json({ error: 'Failed to get data' });
+    }
 });
 
 app.put('/api/groups/order', (req, res) => {
@@ -87,99 +77,129 @@ app.put('/api/groups/order', (req, res) => {
 
 // 添加分组
 app.post('/api/groups', (req, res) => {
-    const { name } = req.body;
-    if (!name) {
-        return res.status(400).json({ error: 'Group name is required' });
+    try {
+        const { name } = req.body;
+        if (!name) {
+            return res.status(400).json({ error: 'Group name is required' });
+        }
+        const data = readData();
+        const newGroup = { id: Date.now(), name, websites: [] };
+        data.groups.push(newGroup);
+        writeData(data);
+        res.status(201).json(newGroup);
+    } catch (error) {
+        console.error('Error adding group:', error);
+        res.status(500).json({ error: 'Failed to add group' });
     }
-    const data = readData();
-    const newGroup = { id: Date.now(), name, websites: [] };
-    data.groups.push(newGroup);
-    writeData(data);
-    res.status(201).json(newGroup);
 });
 
 // 添加网站到分组
 app.post('/api/groups/:groupId/websites', async (req, res) => {
-    const { groupId } = req.params;
-    const { name, url, description } = req.body;
-    if (!name || !url) {
-        return res.status(400).json({ error: 'Website name and URL are required' });
+    try {
+        const { groupId } = req.params;
+        const { name, url, description } = req.body;
+        if (!name || !url) {
+            return res.status(400).json({ error: 'Website name and URL are required' });
+        }
+        const data = readData();
+        const group = data.groups.find(g => g.id === parseInt(groupId));
+        if (!group) {
+            return res.status(404).json({ error: 'Group not found' });
+        }
+        const iconPath = await fetchAndSaveFavicon(url);
+        const newWebsite = { id: Date.now(), name, url, description, iconPath };
+        group.websites.push(newWebsite);
+        writeData(data);
+        res.status(201).json(newWebsite);
+    } catch (error) {
+        console.error('Error adding website:', error);
+        res.status(500).json({ error: 'Failed to add website' });
     }
-    const data = readData();
-    const group = data.groups.find(g => g.id === parseInt(groupId));
-    if (!group) {
-        return res.status(404).json({ error: 'Group not found' });
-    }
-    const iconPath = await fetchAndSaveFavicon(url);
-    const newWebsite = { id: Date.now(), name, url, description, iconPath };
-    group.websites.push(newWebsite);
-    writeData(data);
-    res.status(201).json(newWebsite);
 });
 
 // 删除分组
 app.delete('/api/groups/:groupId/websites/:websiteId', (req, res) => {
-    const { groupId, websiteId } = req.params;
-    const data = readData();
-    const group = data.groups.find(g => g.id === parseInt(groupId));
-    if (!group) {
-        return res.status(404).json({ error: 'Group not found' });
+    try {
+        const { groupId, websiteId } = req.params;
+        const data = readData();
+        const group = data.groups.find(g => g.id === parseInt(groupId));
+        if (!group) {
+            return res.status(404).json({ error: 'Group not found' });
+        }
+        group.websites = group.websites.filter(w => w.id !== parseInt(websiteId));
+        writeData(data);
+        res.status(204).send();
+    } catch (error) {
+        console.error('Error deleting website:', error);
+        res.status(500).json({ error: 'Failed to delete website' });
     }
-    group.websites = group.websites.filter(w => w.id !== parseInt(websiteId));
-    writeData(data);
-    res.status(204).send();
 });
 
 // 删除分组
 app.delete('/api/groups/:groupId', (req, res) => {
-    const { groupId } = req.params;
-    const data = readData();
-    data.groups = data.groups.filter(g => g.id !== parseInt(groupId));
-    writeData(data);
-    res.status(204).send();
+    try {
+        const { groupId } = req.params;
+        const data = readData();
+        data.groups = data.groups.filter(g => g.id !== parseInt(groupId));
+        writeData(data);
+        res.status(204).send();
+    } catch (error) {
+        console.error('Error deleting group:', error);
+        res.status(500).json({ error: 'Failed to delete group' });
+    }
 });
 
 // 修改分组
 app.put('/api/groups/:groupId/websites/:websiteId', (req, res) => {
-    const { groupId, websiteId } = req.params;
-    const { name, url, description, iconPath, groupId: newGroupId } = req.body;
-    if (!name || !url) {
-        return res.status(400).json({ error: 'Website name and URL are required' });
+    try {
+        const { groupId, websiteId } = req.params;
+        const { name, url, description, iconPath, groupId: newGroupId } = req.body;
+        if (!name || !url) {
+            return res.status(400).json({ error: 'Website name and URL are required' });
+        }
+        const data = readData();
+        const group = data.groups.find(g => g.id === parseInt(groupId));
+        if (!group) {
+            return res.status(404).json({ error: 'Group not found' });
+        }
+        const website = group.websites.find(w => w.id === parseInt(websiteId));
+        if (!website) {
+            return res.status(404).json({ error: 'Website not found' });
+        }
+        website.name = name;
+        website.url = url;
+        website.description = description;
+        if (iconPath) {
+            website.iconPath = iconPath;
+        }
+        writeData(data);
+        res.json(website);
+    } catch (error) {
+        console.error('Error updating website:', error);
+        res.status(500).json({ error: 'Failed to update website' });
     }
-    const data = readData();
-    const group = data.groups.find(g => g.id === parseInt(groupId));
-    if (!group) {
-        return res.status(404).json({ error: 'Group not found' });
-    }
-    const website = group.websites.find(w => w.id === parseInt(websiteId));
-    if (!website) {
-        return res.status(404).json({ error: 'Website not found' });
-    }
-    website.name = name;
-    website.url = url;
-    website.description = description;
-    if (iconPath) {
-        website.iconPath = iconPath;
-    }
-    writeData(data);
-    res.json(website);
 });
 
 // 修改分组
 app.put('/api/groups/:groupId', (req, res) => {
-    const { groupId } = req.params;
-    const { name } = req.body;
-    if (!name) {
-        return res.status(400).json({ error: 'Group name is required' });
+    try {
+        const { groupId } = req.params;
+        const { name } = req.body;
+        if (!name) {
+            return res.status(400).json({ error: 'Group name is required' });
+        }
+        const data = readData();
+        const group = data.groups.find(g => g.id === parseInt(groupId));
+        if (!group) {
+            return res.status(404).json({ error: 'Group not found' });
+        }
+        group.name = name;
+        writeData(data);
+        res.json(group);
+    } catch (error) {
+        console.error('Error updating group:', error);
+        res.status(500).json({ error: 'Failed to update group' });
     }
-    const data = readData();
-    const group = data.groups.find(g => g.id === parseInt(groupId));
-    if (!group) {
-        return res.status(404).json({ error: 'Group not found' });
-    }
-    group.name = name;
-    writeData(data);
-    res.json(group);
 });
 
 app.use('/icons', express.static(path.join(__dirname, 'icons')));
