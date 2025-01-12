@@ -40,6 +40,29 @@
     </div>
     <div id="dashboard" class="group-container">
     </div>
+    <div class="modal" id="editGroupModal" style="display:none;">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('editGroupModal')">&times;</span>
+            <h2>Edit Group</h2>
+            <input type="text" id="modalEditGroupName" placeholder="New Group Name" style="user-select: text;">
+            <button onclick="saveModalGroup()">Save</button>
+            <button onclick="closeModal('editGroupModal')">Cancel</button>
+        </div>
+    </div>
+    <div class="modal" id="editWebsiteModal" style="display:none;">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('editWebsiteModal')">&times;</span>
+            <h2>Edit Website</h2>
+            <input type="text" id="modalEditWebsiteName" placeholder="New Website Name" style="user-select: text;">
+            <input type="text" id="modalEditWebsiteUrl" placeholder="New Website URL" style="user-select: text;">
+            <input type="text" id="modalEditWebsiteDescription" placeholder="New Website Description" style="user-select: text;">
+            <select id="modalEditWebsiteGroup" style="user-select: text;">
+                <option value="">Select Group</option>
+            </select>
+            <button onclick="saveModalWebsite()">Save</button>
+            <button onclick="closeModal('editWebsiteModal')">Cancel</button>
+        </div>
+    </div>
     <script src="script.js"></script>
 </body>
 </html> 

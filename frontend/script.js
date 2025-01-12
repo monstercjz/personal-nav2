@@ -30,41 +30,17 @@ function renderDashboard(data) {
                 <button onclick="saveGroup(${group.id})" style="display:none;">保存</button>
             </h2>
             <div class="website-list" id="website-list-${group.id}"></div>
-
-            <div class="modal" id="editGroupModal-${group.id}" style="display:none;">
-                <div class="modal-content">
-                    <span class="close" onclick="closeModal('editGroupModal-${group.id}')">&times;</span>
-                    <h2>Edit Group</h2>
-                    <input type="text" id="modalEditGroupName-${group.id}" placeholder="New Group Name" style="user-select: text;">
-                    <button onclick="saveModalGroup(${group.id})">Save</button>
-                    <button onclick="closeModal('editGroupModal-${group.id}')">Cancel</button>
-                </div>
-            </div>
         `;
         dashboard.appendChild(groupDiv);
         const websiteList = document.getElementById(`website-list-${group.id}`);
         group.websites.forEach(website => {
             const websiteItem = document.createElement('div');
             websiteItem.classList.add('website-item');
+            websiteItem.setAttribute('data-description', website.description);
             websiteItem.innerHTML = `
                 ${website.iconPath ? `<img src="${backendUrl}${website.iconPath}" style="width: 16px; height: 16px; margin-right: 5px;">` : ''}
-                <a href="${website.url}" target="_blank">${website.name}</a>
+                <a href="${website.url}?websiteId=${website.id}" target="_blank">${website.name}</a>
                 <span style="display:none;">${website.iconPath}</span>
-
-                <div class="modal" id="editWebsiteModal-${group.id}-${website.id}" style="display:none;">
-                    <div class="modal-content">
-                        <span class="close" onclick="closeModal('editWebsiteModal-${group.id}-${website.id}')">&times;</span>
-                        <h2>Edit Website</h2>
-                        <input type="text" id="modalEditWebsiteName-${group.id}-${website.id}" placeholder="New Website Name" value="${website.name}" style="user-select: text;">
-                        <input type="text" id="modalEditWebsiteUrl-${group.id}-${website.id}" placeholder="New Website URL" value="${website.url}" style="user-select: text;">
-                        <input type="text" id="modalEditWebsiteDescription-${group.id}-${website.id}" placeholder="New Website Description" value="${website.description}" style="user-select: text;">
-                        <select id="modalEditWebsiteGroup-${group.id}-${website.id}" style="user-select: text;">
-                            <option value="">Select Group</option>
-                        </select>
-                        <button onclick="saveModalWebsite(${group.id}, ${website.id})">Save</button>
-                        <button onclick="closeModal('editWebsiteModal-${group.id}-${website.id}')">Cancel</button>
-                    </div>
-                </div>
             `;
             websiteList.appendChild(websiteItem);
         });
@@ -72,6 +48,11 @@ function renderDashboard(data) {
 }
 
 dashboard.addEventListener('dragstart', (e) => {
+    // 检查点击的元素是否是输入框
+    if (e.target.tagName === 'INPUT') {
+        e.preventDefault(); // 如果是输入框，则阻止拖拽事件
+        return;
+    }
     e.dataTransfer.setData('text/plain', e.target.id);
 });
 
@@ -277,8 +258,12 @@ document.addEventListener('contextmenu', function (e) {
         e.preventDefault();
         const websiteItem = target.closest('.website-item');
         const groupId = websiteItem.closest('.group').querySelector('h2 input[id^="editGroupName-"]').getAttribute('id').match(/editGroupName-(\d+)/)[1];
-        const websiteId = websiteItem.querySelector('div[id^="editWebsiteModal-"]').getAttribute('id').match(/editWebsiteModal-(\d+)-(\d+)/)[2];
-        showWebsiteContextMenu(e, groupId, websiteId);
+        const websiteUrl = target.getAttribute('href');
+        const websiteIdMatch = websiteUrl.match(/websiteId=(\d+)/);
+        const websiteId = websiteIdMatch ? websiteIdMatch[1] : null;
+        if (websiteId) {
+            showWebsiteContextMenu(e, groupId, websiteId);
+        }
     }
 });
 
@@ -311,46 +296,26 @@ function showWebsiteContextMenu(e, groupId, websiteId) {
 }
 
 // 编辑分组
+let currentEditGroupId = null;
 async function editGroup(groupId) {
     hideContextMenu();
-    const modal = document.getElementById(`editGroupModal-${groupId}`);
+    currentEditGroupId = groupId;
+    const modal = document.getElementById('editGroupModal');
     modal.style.display = 'block';
-    const modalEditGroupName = document.getElementById(`modalEditGroupName-${groupId}`);
+    const modalEditGroupName = document.getElementById('modalEditGroupName');
     const groupDiv = document.querySelector(`.group:has(h2 input[id^="editGroupName-${groupId}"])`);
     const editInput = groupDiv.querySelector(`#editGroupName-${groupId}`);
     modalEditGroupName.value = editInput.value;
 }
 
 // 保存分组
-async function saveGroup(groupId) {
-    const groupDiv = document.querySelector(`.group:has(h2 input[id^="editGroupName-${groupId}"])`);
-    const editInput = groupDiv.querySelector(`#editGroupName-${groupId}`);
-    const modal = document.getElementById(`editGroupModal-${groupId}`);
-    const modalEditGroupName = document.getElementById(`modalEditGroupName-${groupId}`);
-    const newGroupName = modalEditGroupName.value;
-    if (!newGroupName) {
-        alert('Please enter a new group name.');
-        return;
-    }
-    const response = await fetch(`${backendUrl}/groups/${groupId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: newGroupName })
-    });
-    if (response.ok) {
-        fetchDataAndRender();
-        modal.style.display = 'none';
-    } else {
-        alert('Failed to update group name.');
-    }
-}
-
-async function saveModalGroup(groupId) {
+async function saveModalGroup() {
     hideContextMenu();
+    const groupId = currentEditGroupId;
     const groupDiv = document.querySelector(`.group:has(h2 input[id^="editGroupName-${groupId}"])`);
     const editInput = groupDiv.querySelector(`#editGroupName-${groupId}`);
-    const modal = document.getElementById(`editGroupModal-${groupId}`);
-    const modalEditGroupName = document.getElementById(`modalEditGroupName-${groupId}`);
+    const modal = document.getElementById('editGroupModal');
+    const modalEditGroupName = document.getElementById('modalEditGroupName');
     const newGroupName = modalEditGroupName.value;
     if (!newGroupName) {
         alert('Please enter a new group name.');
@@ -370,18 +335,22 @@ async function saveModalGroup(groupId) {
 }
 
 // 编辑网站
+let currentEditWebsiteGroupId = null;
+let currentEditWebsiteId = null;
 async function editWebsite(groupId, websiteId) {
     hideContextMenu();
-    const modal = document.getElementById(`editWebsiteModal-${groupId}-${websiteId}`);
+    currentEditWebsiteGroupId = groupId;
+    currentEditWebsiteId = websiteId;
+    const modal = document.getElementById('editWebsiteModal');
     modal.style.display = 'block';
-    const modalEditWebsiteName = document.getElementById(`modalEditWebsiteName-${groupId}-${websiteId}`);
-    const modalEditWebsiteUrl = document.getElementById(`modalEditWebsiteUrl-${groupId}-${websiteId}`);
-    const modalEditWebsiteDescription = document.getElementById(`modalEditWebsiteDescription-${groupId}-${websiteId}`);
-    const modalEditWebsiteGroup = document.getElementById(`modalEditWebsiteGroup-${groupId}-${websiteId}`);
-    const websiteItem = document.querySelector(`.website-item:has(a[href="${modalEditWebsiteUrl.value}"])`);
-    const websiteUrl = websiteItem.querySelector('a').getAttribute('href');
+    const modalEditWebsiteName = document.getElementById('modalEditWebsiteName');
+    const modalEditWebsiteUrl = document.getElementById('modalEditWebsiteUrl');
+    const modalEditWebsiteDescription = document.getElementById('modalEditWebsiteDescription');
+    const modalEditWebsiteGroup = document.getElementById('modalEditWebsiteGroup');
+    const websiteItem = document.querySelector(`.website-item a[href*="websiteId=${websiteId}"]`).closest('.website-item');
+    const websiteUrl = websiteItem.querySelector('a').getAttribute('href').split('?')[0];
     const websiteName = websiteItem.querySelector('a').textContent;
-    const websiteDescription = websiteItem.querySelector('span').textContent;
+    const websiteDescription = websiteItem.getAttribute('data-description');
     modalEditWebsiteName.value = websiteName;
     modalEditWebsiteUrl.value = websiteUrl;
     modalEditWebsiteDescription.value = websiteDescription;
@@ -402,52 +371,15 @@ async function editWebsite(groupId, websiteId) {
 }
 
 // 保存网站
-async function saveWebsite(groupId, websiteId) {
-    const modal = document.getElementById(`editWebsiteModal-${groupId}-${websiteId}`);
-    const modalEditWebsiteName = document.getElementById(`modalEditWebsiteName-${groupId}-${websiteId}`).value;
-    let modalEditWebsiteUrl = document.getElementById(`modalEditWebsiteUrl-${groupId}-${websiteId}`).value;
-    const modalEditWebsiteDescription = document.getElementById(`modalEditWebsiteDescription-${groupId}-${websiteId}`).value;
-
-    // URL 校验和补全
-    const urlRegex = /^[^\s/$.?#].[^\s]*$/i;
-    if (!urlRegex.test(modalEditWebsiteUrl)) {
-        alert('Please enter a valid URL.');
-        return;
-    }
-    if (!modalEditWebsiteUrl.startsWith('https://') && !modalEditWebsiteUrl.startsWith('http://')) {
-        modalEditWebsiteUrl = 'https://' + modalEditWebsiteUrl;
-    }
-
-    const response = await fetch(`${backendUrl}/groups/${groupId}/websites/${websiteId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: modalEditWebsiteName, url: modalEditWebsiteUrl, description: modalEditWebsiteDescription })
-    });
-    if (response.ok) {
-        // 重新获取图标
-        const iconResponse = await fetch(`${backendUrl}/favicon?url=${modalEditWebsiteUrl}`);
-        if (iconResponse.ok) {
-            const iconData = await iconResponse.json();
-            const updateResponse = await fetch(`${backendUrl}/groups/${groupId}/websites/${websiteId}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name: modalEditWebsiteName, url: modalEditWebsiteUrl, description: modalEditWebsiteDescription, iconPath: iconData.iconPath })
-            });
-        }
-        fetchDataAndRender();
-        modal.style.display = 'none';
-    } else {
-        alert('Failed to update website.');
-    }
-}
-
-async function saveModalWebsite(groupId, websiteId) {
+async function saveModalWebsite() {
     hideContextMenu();
-    const modal = document.getElementById(`editWebsiteModal-${groupId}-${websiteId}`);
-    const modalEditWebsiteName = document.getElementById(`modalEditWebsiteName-${groupId}-${websiteId}`).value;
-    let modalEditWebsiteUrl = document.getElementById(`modalEditWebsiteUrl-${groupId}-${websiteId}`).value;
-    const modalEditWebsiteDescription = document.getElementById(`modalEditWebsiteDescription-${groupId}-${websiteId}`).value;
-    const modalEditWebsiteGroup = document.getElementById(`modalEditWebsiteGroup-${groupId}-${websiteId}`).value;
+    const groupId = currentEditWebsiteGroupId;
+    const websiteId = currentEditWebsiteId;
+    const modal = document.getElementById('editWebsiteModal');
+    const modalEditWebsiteName = document.getElementById('modalEditWebsiteName').value;
+    let modalEditWebsiteUrl = document.getElementById('modalEditWebsiteUrl').value;
+    const modalEditWebsiteDescription = document.getElementById('modalEditWebsiteDescription').value;
+    const modalEditWebsiteGroup = document.getElementById('modalEditWebsiteGroup').value;
 
     // URL 校验和补全
     const urlRegex = /^[^\s/$.?#].[^\s]*$/i;
