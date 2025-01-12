@@ -74,6 +74,17 @@ app.get('/api/data', (req, res) => {
     res.json(data);
 });
 
+app.put('/api/groups/order', (req, res) => {
+    const { groups } = req.body;
+    if (!groups) {
+        return res.status(400).json({ error: 'Groups are required' });
+    }
+    const data = readData();
+    data.groups = groups;
+    writeData(data);
+    res.json(data);
+});
+
 // 添加分组
 app.post('/api/groups', (req, res) => {
     const { name } = req.body;
@@ -107,15 +118,6 @@ app.post('/api/groups/:groupId/websites', async (req, res) => {
 });
 
 // 删除分组
-app.delete('/api/groups/:groupId', (req, res) => {
-    const { groupId } = req.params;
-    const data = readData();
-    data.groups = data.groups.filter(g => g.id !== parseInt(groupId));
-    writeData(data);
-    res.status(204).send();
-});
-
-// 删除网站
 app.delete('/api/groups/:groupId/websites/:websiteId', (req, res) => {
     const { groupId, websiteId } = req.params;
     const data = readData();
@@ -128,24 +130,16 @@ app.delete('/api/groups/:groupId/websites/:websiteId', (req, res) => {
     res.status(204).send();
 });
 
-// 修改分组
-app.put('/api/groups/:groupId', (req, res) => {
+// 删除分组
+app.delete('/api/groups/:groupId', (req, res) => {
     const { groupId } = req.params;
-    const { name } = req.body;
-    if (!name) {
-        return res.status(400).json({ error: 'Group name is required' });
-    }
     const data = readData();
-    const group = data.groups.find(g => g.id === parseInt(groupId));
-    if (!group) {
-        return res.status(404).json({ error: 'Group not found' });
-    }
-    group.name = name;
+    data.groups = data.groups.filter(g => g.id !== parseInt(groupId));
     writeData(data);
-    res.json(group);
+    res.status(204).send();
 });
 
-// 修改网站
+// 修改分组
 app.put('/api/groups/:groupId/websites/:websiteId', (req, res) => {
     const { groupId, websiteId } = req.params;
     const { name, url, description, iconPath, groupId: newGroupId } = req.body;
@@ -171,15 +165,21 @@ app.put('/api/groups/:groupId/websites/:websiteId', (req, res) => {
     res.json(website);
 });
 
-app.put('/api/groups/order', (req, res) => {
-    const { groups } = req.body;
-    if (!groups) {
-        return res.status(400).json({ error: 'Groups are required' });
+// 修改分组
+app.put('/api/groups/:groupId', (req, res) => {
+    const { groupId } = req.params;
+    const { name } = req.body;
+    if (!name) {
+        return res.status(400).json({ error: 'Group name is required' });
     }
     const data = readData();
-    data.groups = groups;
+    const group = data.groups.find(g => g.id === parseInt(groupId));
+    if (!group) {
+        return res.status(404).json({ error: 'Group not found' });
+    }
+    group.name = name;
     writeData(data);
-    res.json(data);
+    res.json(group);
 });
 
 app.use('/icons', express.static(path.join(__dirname, 'icons')));

@@ -35,7 +35,7 @@ function renderDashboard(data) {
                 <div class="modal-content">
                     <span class="close" onclick="closeModal('editGroupModal-${group.id}')">&times;</span>
                     <h2>Edit Group</h2>
-                    <input type="text" id="modalEditGroupName-${group.id}" placeholder="New Group Name">
+                    <input type="text" id="modalEditGroupName-${group.id}" placeholder="New Group Name" style="user-select: text;">
                     <button onclick="saveModalGroup(${group.id})">Save</button>
                     <button onclick="closeModal('editGroupModal-${group.id}')">Cancel</button>
                 </div>
@@ -55,10 +55,10 @@ function renderDashboard(data) {
                     <div class="modal-content">
                         <span class="close" onclick="closeModal('editWebsiteModal-${group.id}-${website.id}')">&times;</span>
                         <h2>Edit Website</h2>
-                        <input type="text" id="modalEditWebsiteName-${group.id}-${website.id}" placeholder="New Website Name" value="${website.name}">
-                        <input type="text" id="modalEditWebsiteUrl-${group.id}-${website.id}" placeholder="New Website URL" value="${website.url}">
-                        <input type="text" id="modalEditWebsiteDescription-${group.id}-${website.id}" placeholder="New Website Description" value="${website.description}" >
-                        <select id="modalEditWebsiteGroup-${group.id}-${website.id}">
+                        <input type="text" id="modalEditWebsiteName-${group.id}-${website.id}" placeholder="New Website Name" value="${website.name}" style="user-select: text;">
+                        <input type="text" id="modalEditWebsiteUrl-${group.id}-${website.id}" placeholder="New Website URL" value="${website.url}" style="user-select: text;">
+                        <input type="text" id="modalEditWebsiteDescription-${group.id}-${website.id}" placeholder="New Website Description" value="${website.description}" style="user-select: text;">
+                        <select id="modalEditWebsiteGroup-${group.id}-${website.id}" style="user-select: text;">
                             <option value="">Select Group</option>
                         </select>
                         <button onclick="saveModalWebsite(${group.id}, ${website.id})">Save</button>
