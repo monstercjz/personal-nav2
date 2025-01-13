@@ -551,45 +551,6 @@ h1 {
     right: 2rem;
 }
 
-.theme-button-container {
-    position: fixed;
-    bottom: 2rem;
-    right: 6rem;
-    z-index: 100;
-}
-
-.theme-button-container button {
-    background: var(--primary-color);
-    color: white;
-    border: none;
-    padding: 1rem;
-    border-radius: 50%;
-    width: 56px;
-    height: 56px;
-    cursor: pointer;
-    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
-    transition: var(--transition);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    overflow: hidden;
-    background: radial-gradient(circle at center, var(--primary-color) 0%, var(--secondary-color) 100%);
-}
-
-.theme-button-container button:hover {
-    transform: scale(1.1);
-    box-shadow: 0 6px 16px rgba(124, 58, 237, 0.4);
-}
-
-.theme-button-container button svg {
-    transition: transform 0.2s ease;
-}
-
-.theme-button-container button:hover svg {
-    transform: rotate(90deg);
-}
-
 .add-button-container {
     position: fixed;
     bottom: 2rem;
