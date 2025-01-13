@@ -314,11 +314,14 @@ dashboard.addEventListener('contextmenu', function (e) {
 function createContextMenu(e, menuItems) {
     const menu = document.createElement('div');
     menu.id = 'contextMenu';
+    menu.style.position = 'fixed';
     menu.style.left = `${e.pageX}px`;
     menu.style.top = `${e.pageY}px`;
+    menu.style.zIndex = '1000';
     menu.innerHTML = menuItems.join('');
     document.body.appendChild(menu);
     document.addEventListener('click', hideContextMenu);
+    return menu;
 }
 
 // 显示分组右键菜单

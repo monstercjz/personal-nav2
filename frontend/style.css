@@ -45,7 +45,7 @@ h1 {
     display: grid;
     grid-template-columns: repeat(3, minmax(280px, 1fr));
     gap: 2rem;
-    max-width: 1300px;
+    max-width: 1350px;
     margin: 0 auto;
     padding: 2rem;
     position: relative;
@@ -172,7 +172,7 @@ h1 {
 
 .website-list {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(10px, 1fr));
     gap: 1rem;
     padding: 0.1rem;
     width: 100%;
@@ -181,11 +181,17 @@ h1 {
 
 @media (max-width: 1200px) {
     .website-list {
-        grid-template-columns: repeat(2, minmax(200px, 1fr));
+        grid-template-columns: repeat(3, minmax(200px, 1fr));
     }
 }
 
 @media (max-width: 768px) {
+    .website-list {
+        grid-template-columns: repeat(2, minmax(200px, 1fr));
+    }
+}
+
+@media (max-width: 480px) {
     .website-list {
         grid-template-columns: 1fr;
     }
@@ -209,7 +215,7 @@ h1 {
     box-shadow: var(--glass-shadow);
     position: relative;
     overflow: hidden;
-    min-height: 80px;
+    min-height: 60px;
     height: auto;
 }
 
@@ -676,4 +682,50 @@ h1 {
     border-radius: 50%;
     transform: translate(-50%, -50%);
     animation: ripple 0.6s ease-out;
+}
+
+/* Context Menu Styles */
+#contextMenu {
+    position: fixed;
+    z-index: 9999;
+    background: var(--surface);
+    border-radius: var(--radius);
+    box-shadow: var(--glass-shadow);
+    backdrop-filter: var(--glass-blur);
+    border: var(--glass-border);
+    min-width: 160px;
+    animation: fadeIn 0.2s ease-out;
+    overflow: hidden;
+    display: block !important;
+}
+
+#contextMenu div {
+    padding: 0.75rem 1rem;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: var(--transition);
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+#contextMenu div:hover {
+    background: rgba(124, 58, 237, 0.1);
+    color: var(--primary-color);
+}
+
+#contextMenu div:active {
+    transform: scale(0.98);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(4px) scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
 }
