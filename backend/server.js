@@ -11,7 +11,7 @@ const port = 3000;
 
 app.use(cors());
 app.use('/api/icons', express.static(path.join(__dirname, 'icons')));
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: '20mb' }));
 
 // 创建 icons 文件夹
 const iconsDir = path.join(__dirname, 'icons');
@@ -63,6 +63,18 @@ app.get('/api/data', (req, res) => {
     } catch (error) {
         console.error('Error getting data:', error);
         res.status(500).json({ error: 'Failed to get data' });
+    }
+});
+
+// 替换所有数据
+app.put('/api/data', (req, res) => {
+    try {
+        const newData = req.body;
+        writeData(newData);
+        res.json(newData);
+    } catch (error) {
+        console.error('Error updating data:', error);
+        res.status(500).json({ error: 'Failed to update data' });
     }
 });
 

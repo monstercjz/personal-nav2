@@ -638,3 +638,88 @@ exportDataButton.addEventListener('click', async () => {
         showNotification('数据导出失败', 'error');
     }
 });
+
+const importWebsitesButton = document.getElementById('importWebsites');
+
+importWebsitesButton.addEventListener('click', () => {
+    const container = document.createElement('div');
+    container.style.position = 'fixed';
+    container.style.top = '50%';
+    container.style.left = '50%';
+    container.style.transform = 'translate(-50%, -50%)';
+    container.style.padding = '20px';
+    container.style.border = '1px solid #ccc';
+    container.style.borderRadius = '5px';
+    container.style.zIndex = '1001';
+    container.style.backgroundColor = '#fff';
+
+    const textarea = document.createElement('textarea');
+    textarea.placeholder = '请粘贴网站列表，格式为 网站名:网站地址，一行一个';
+    textarea.style.width = '100%';
+    textarea.style.height = '150px';
+    textarea.style.marginBottom = '10px';
+    container.appendChild(textarea);
+
+    const saveButton = document.createElement('button');
+    saveButton.textContent = '保存';
+    
+    const cancelButton = document.createElement('button');
+    cancelButton.textContent = '取消';
+    cancelButton.style.marginLeft = '10px';
+
+    container.appendChild(saveButton);
+    container.appendChild(cancelButton);
+
+    document.body.appendChild(container);
+    container.style.width = '500px';
+    container.style.height = '400px';
+    textarea.focus();
+
+    cancelButton.addEventListener('click', () => {
+        document.body.removeChild(container);
+    });
+
+    saveButton.addEventListener('click', async () => {
+        const websites = textarea.value.trim().split('\n').filter(line => line.trim() !== '');
+        if (websites.length === 0) {
+            showNotification('没有检测到网站', 'error');
+            document.body.removeChild(container);
+            return;
+        }
+        const now = new Date();
+        const groupName = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`;
+        try {
+            const createGroupResponse = await fetch(`${backendUrl}/groups`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: groupName })
+            });
+            if (!createGroupResponse.ok) {
+                showNotification('创建分组失败', 'error');
+                document.body.removeChild(container);
+                return;
+            }
+            const newGroup = await createGroupResponse.json();
+            for (const line of websites) {
+                const [name, url] = line.split(':').map(item => item.trim());
+                if (name && url) {
+                    const validatedUrl = validateAndCompleteUrl(url);
+                    if (validatedUrl) {
+                        await fetch(`${backendUrl}/groups/${newGroup.id}/websites`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ name: name, url: validatedUrl, description: '' })
+                        });
+                    }
+                }
+            }
+            showNotification('网站导入成功', 'success');
+            fetchDataAndRender();
+            document.body.removeChild(container);
+        } catch (error) {
+            console.error('Failed to import websites:', error);
+            showNotification('网站导入失败', 'error');
+            document.body.removeChild(container);
+        }
+    });
+});
