@@ -1,3 +1,20 @@
+const toggleThemeButton = document.getElementById('toggleTheme');
+const body = document.body;
+
+// 从 localStorage 获取主题
+const savedTheme = localStorage.getItem('theme');
+if (savedTheme) {
+    body.setAttribute('data-theme', savedTheme);
+}
+
+// 切换主题
+toggleThemeButton.addEventListener('click', () => {
+    const currentTheme = body.getAttribute('data-theme') || 'light';
+    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+    body.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+});
+
 const dashboard = document.getElementById('dashboard');
 const backendUrl = 'http://localhost:3000/api';
 const groupSelect = document.getElementById('groupSelect');
