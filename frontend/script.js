@@ -315,8 +315,25 @@ function createContextMenu(e, menuItems) {
     const menu = document.createElement('div');
     menu.id = 'contextMenu';
     menu.style.position = 'fixed';
-    menu.style.left = `${e.pageX}px`;
-    menu.style.top = `${e.pageY}px`;
+    
+    // 获取视口尺寸
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    
+    // 直接使用鼠标位置
+    let left = e.clientX;
+    let top = e.clientY;
+    
+    // 确保菜单不会超出屏幕边界
+    if (left + 200 > viewportWidth) {
+        left = viewportWidth - 200;
+    }
+    if (top + 100 > viewportHeight) {
+        top = viewportHeight - 100;
+    }
+    
+    menu.style.left = `${left}px`;
+    menu.style.top = `${top}px`;
     menu.style.zIndex = '1000';
     menu.innerHTML = menuItems.join('');
     document.body.appendChild(menu);

@@ -688,44 +688,92 @@ h1 {
 #contextMenu {
     position: fixed;
     z-index: 9999;
-    background: var(--surface);
+    background: linear-gradient(145deg, rgba(255,255,255,0.95) 0%, rgba(245,243,255,0.95) 100%);
     border-radius: var(--radius);
-    box-shadow: var(--glass-shadow);
-    backdrop-filter: var(--glass-blur);
-    border: var(--glass-border);
-    min-width: 160px;
+    box-shadow: 0 8px 32px rgba(99, 102, 241, 0.2);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(124, 58, 237, 0.1);
+    min-width: 180px;
     animation: fadeIn 0.2s ease-out;
     overflow: hidden;
     display: block !important;
+    transform-origin: top left;
+}
+
+#contextMenu::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(145deg, rgba(124,58,237,0.05) 0%, rgba(147,51,234,0.05) 100%);
+    z-index: -1;
+}
+
+#contextMenu::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: conic-gradient(
+        from 180deg at 50% 50%,
+        rgba(124, 58, 237, 0.1) 0deg,
+        rgba(147, 51, 234, 0.1) 180deg,
+        rgba(124, 58, 237, 0.1) 360deg
+    );
+    animation: rotate 6s linear infinite;
+    z-index: -2;
 }
 
 #contextMenu div {
     padding: 0.75rem 1rem;
     color: var(--text-primary);
     cursor: pointer;
-    transition: var(--transition);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     font-size: 0.9rem;
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    position: relative;
+    overflow: hidden;
+}
+
+#contextMenu div::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, rgba(124,58,237,0.1) 0%, rgba(147,51,234,0.1) 100%);
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    z-index: -1;
 }
 
 #contextMenu div:hover {
-    background: rgba(124, 58, 237, 0.1);
     color: var(--primary-color);
+}
+
+#contextMenu div:hover::before {
+    transform: translateX(0);
 }
 
 #contextMenu div:active {
     transform: scale(0.98);
+    background: rgba(124, 58, 237, 0.05);
 }
 
 @keyframes fadeIn {
     from {
         opacity: 0;
-        transform: translateY(4px) scale(0.98);
+        transform: scale(0.98);
     }
     to {
         opacity: 1;
-        transform: translateY(0) scale(1);
+        transform: scale(1);
     }
 }
