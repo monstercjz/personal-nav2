@@ -11,13 +11,39 @@ const showAddWebsite = document.getElementById('showAddWebsite');
 // 获取数据并渲染
 async function fetchDataAndRender() {
     try {
+        dashboard.classList.add('loading');
         const response = await fetch(`${backendUrl}/data`);
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         const data = await response.json();
         renderDashboard(data);
+        showNotification('数据加载成功', 'success');
     } catch (error) {
         console.error('Failed to fetch data:', error);
-        alert('Failed to load data. Please check the console for details.');
+        showNotification('数据加载失败，请重试', 'error');
+    } finally {
+        dashboard.classList.remove('loading');
     }
+}
+
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    
+    // Animate in
+    notification.style.transform = 'translateY(-20px)';
+    notification.style.opacity = '0';
+    setTimeout(() => {
+        notification.style.transform = 'translateY(0)';
+        notification.style.opacity = '1';
+    }, 10);
+
+    // Remove after 3 seconds
+    setTimeout(() => {
+        notification.style.opacity = '0';
+        setTimeout(() => notification.remove(), 300);
+    }, 3000);
 }
 
 // 渲染仪表盘
@@ -101,7 +127,7 @@ async function saveGroupOrder() {
         body: JSON.stringify({ groups: orderedGroups })
     });
     if (!updateResponse.ok) {
-        alert('Failed to save group order.');
+        alert('保存分组顺序失败');
     }
 }
 
@@ -126,7 +152,7 @@ async function fetchAndRenderGroupSelect() {
         renderGroupSelect(groupsData);
     } catch (error) {
         console.error('Failed to fetch group data:', error);
-        alert('Failed to load group data. Please check the console for details.');
+        alert('加载分组数据失败，请检查控制台获取详细信息');
     }
 }
 
@@ -135,21 +161,27 @@ async function addGroup() {
     const modal = document.getElementById('addGroupModal');
     const newGroupName = modal.querySelector('#newGroupName').value;
     if (!newGroupName) {
-        alert('Please enter a group name.');
+            showNotification('请输入分组名称', 'error');
         return;
     }
-    const response = await fetch(`${backendUrl}/groups`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: newGroupName })
-    });
-    if (response.ok) {
+    
+    try {
+        const response = await fetch(`${backendUrl}/groups`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: newGroupName })
+        });
+        
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        
+        showNotification('分组添加成功', 'success');
         fetchDataAndRender();
         modal.querySelector('#newGroupName').value = '';
         fetchAndRenderGroupSelect();
         closeModal('addGroupModal');
-    } else {
-        alert('Failed to add group.');
+    } catch (error) {
+        console.error('Failed to add group:', error);
+        showNotification('分组添加失败，请重试', 'error');
     }
 }
 
@@ -167,7 +199,7 @@ async function addWebsite() {
     }
 
     if (!newWebsiteName || !newWebsiteUrl || !newWebsiteDescription) {
-        alert('Please enter website name, URL and description.');
+        alert('请输入网站名称、URL和描述');
         return;
     }
 
@@ -187,7 +219,7 @@ async function addWebsite() {
                 body: JSON.stringify({ name: 'Default' })
             });
             if (!createGroupResponse.ok) {
-                alert('Failed to create default group.');
+        alert('创建默认分组失败');
                 return;
             }
             defaultGroup = await createGroupResponse.json();
@@ -216,28 +248,28 @@ async function addWebsite() {
 
 // 删除分组
 async function deleteGroup(groupId) {
-    if (confirm('Are you sure you want to delete this group?')) {
+    if (confirm('确定要删除这个分组吗？')) {
         const response = await fetch(`${backendUrl}/groups/${groupId}`, {
             method: 'DELETE'
         });
         if (response.ok) {
             fetchDataAndRender();
         } else {
-            alert('Failed to delete group.');
+        alert('删除分组失败');
         }
     }
 }
 
 // 删除网站
 async function deleteWebsite(groupId, websiteId) {
-    if (confirm('Are you sure you want to delete this website?')) {
+    if (confirm('确定要删除这个网站吗？')) {
         const response = await fetch(`${backendUrl}/groups/${groupId}/websites/${websiteId}`, {
             method: 'DELETE'
         });
         if (response.ok) {
             fetchDataAndRender();
         } else {
-            alert('Failed to delete website.');
+        alert('删除网站失败');
         }
     }
 }
@@ -324,7 +356,7 @@ async function editGroup(groupId) {
 function validateAndCompleteUrl(url) {
     const urlRegex = /^[^\s/$.?#].[^\s]*$/i;
     if (!urlRegex.test(url)) {
-        alert('Please enter a valid URL.');
+        alert('请输入有效的URL');
         return null;
     }
     if (!url.startsWith('https://') && !url.startsWith('http://')) {
@@ -354,7 +386,7 @@ async function saveModalGroup() {
     const modalEditGroupName = document.getElementById('modalEditGroupName');
     const newGroupName = modalEditGroupName.value;
     if (!newGroupName) {
-        alert('Please enter a new group name.');
+        alert('请输入新的分组名称');
         return;
     }
     const response = await fetch(`${backendUrl}/groups/${groupId}`, {
@@ -366,7 +398,7 @@ async function saveModalGroup() {
         fetchDataAndRender();
         modal.style.display = 'none';
     } else {
-        alert('Failed to update group name.');
+        alert('更新分组名称失败');
     }
 }
 
@@ -442,7 +474,7 @@ async function saveModalWebsite() {
             method: 'DELETE'
         });
         if (!response.ok) {
-            alert('Failed to move website.');
+        alert('移动网站失败');
             return;
         }
         // 再添加新分组的网站
@@ -484,13 +516,17 @@ async function saveModalWebsite() {
         fetchDataAndRender();
         modal.style.display = 'none';
     } else {
-        alert('Failed to update website.');
+        alert('更新网站失败');
     }
 }
 
 function closeModal(modalId) {
     const modal = document.getElementById(modalId);
-    modal.style.display = 'none';
+    modal.classList.add('closing');
+    setTimeout(() => {
+        modal.style.display = 'none';
+        modal.classList.remove('closing');
+    }, 200); // Match the animation duration
 }
 
 toggleAddButtons.addEventListener('click', () => {
@@ -507,4 +543,4 @@ showAddWebsite.addEventListener('click', () => {
     addButtons.style.display = 'none';
     const modal = document.getElementById('addWebsiteModal');
     modal.style.display = 'block';
-}); 
+});

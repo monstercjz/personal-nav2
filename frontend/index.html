@@ -3,17 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Personal Dashboard</title>
+    <meta name="description" content="个人导航面板，用于组织和访问您常用的网站和资源">
+    <title>个人导航面板</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
 <body>
-    <h1>Personal Dashboard</h1>
+    <h1 aria-label="个人导航面板">个人导航面板</h1>
     <div class="add-buttons" style="display:none;">
-        <button id="showAddGroup" >Add Group</button>
-        <button id="showAddWebsite">Add Website</button>
+        <button id="showAddGroup" >添加分组</button>
+        <button id="showAddWebsite">添加网站</button>
     </div>
     <div class="add-button-container">
-        <button id="toggleAddButtons">+</button>
+        <button id="toggleAddButtons" aria-label="切换添加按钮">+</button>
     </div>
     <main id="dashboard">
         <!-- Groups will be rendered here -->
@@ -21,49 +25,49 @@
     <div class="modal" id="addGroupModal" style="display:none;">
         <div class="modal-content">
             <span class="close" onclick="closeModal('addGroupModal')">&times;</span>
-            <h2>Add Group</h2>
-            <input type="text" id="newGroupName" placeholder="New Group Name">
-            <button onclick="addGroup()">Add Group</button>
-            <button onclick="closeModal('addGroupModal')">Cancel</button>
+            <h2>添加分组</h2>
+            <input type="text" id="newGroupName" placeholder="新分组名称">
+            <button onclick="addGroup()" aria-label="添加新分组">添加分组</button>
+            <button onclick="closeModal('addGroupModal')" aria-label="取消创建分组">取消</button>
         </div>
     </div>
     <div class="modal" id="addWebsiteModal" style="display:none;">
         <div class="modal-content">
             <span class="close" onclick="closeModal('addWebsiteModal')">&times;</span>
-            <h2>Add Website</h2>
-            <input type="text" id="newWebsiteName" placeholder="Website Name">
-            <input type="text" id="newWebsiteUrl" placeholder="Website URL">
-            <input type="text" id="newWebsiteDescription" placeholder="Website Description">
+            <h2>添加网站</h2>
+            <input type="text" id="newWebsiteName" placeholder="网站名称">
+            <input type="text" id="newWebsiteUrl" placeholder="网站地址">
+            <input type="text" id="newWebsiteDescription" placeholder="网站描述">
             <select id="groupSelect">
-                <option value="">Select Group</option>
+                <option value="">选择分组</option>
             </select>
-            <button onclick="addWebsite()">Add Website</button>
-            <button onclick="closeModal('addWebsiteModal')">Cancel</button>
+            <button onclick="addWebsite()" aria-label="添加新网站">添加网站</button>
+            <button onclick="closeModal('addWebsiteModal')" aria-label="取消创建网站">取消</button>
         </div>
     </div>
     <div class="modal" id="editGroupModal" style="display:none;">
         <div class="modal-content">
             <span class="close" onclick="closeModal('editGroupModal')">&times;</span>
-            <h2>Edit Group</h2>
-            <input type="text" id="modalEditGroupName" placeholder="New Group Name" style="user-select: text;">
-            <button onclick="saveModalGroup()">Save</button>
-            <button onclick="closeModal('editGroupModal')">Cancel</button>
+            <h2>编辑分组</h2>
+            <input type="text" id="modalEditGroupName" placeholder="新分组名称" style="user-select: text;">
+            <button onclick="saveModalGroup()">保存</button>
+            <button onclick="closeModal('editGroupModal')">取消</button>
         </div>
     </div>
     <div class="modal" id="editWebsiteModal" style="display:none;">
         <div class="modal-content">
             <span class="close" onclick="closeModal('editWebsiteModal')">&times;</span>
-            <h2>Edit Website</h2>
-            <input type="text" id="modalEditWebsiteName" placeholder="New Website Name" style="user-select: text;">
-            <input type="text" id="modalEditWebsiteUrl" placeholder="New Website URL" style="user-select: text;">
-            <input type="text" id="modalEditWebsiteDescription" placeholder="New Website Description" style="user-select: text;">
+            <h2>编辑网站</h2>
+            <input type="text" id="modalEditWebsiteName" placeholder="新网站名称" style="user-select: text;">
+            <input type="text" id="modalEditWebsiteUrl" placeholder="新网站地址" style="user-select: text;">
+            <input type="text" id="modalEditWebsiteDescription" placeholder="新网站描述" style="user-select: text;">
             <select id="modalEditWebsiteGroup" style="user-select: text;">
-                <option value="">Select Group</option>
+                <option value="">选择分组</option>
             </select>
-            <button onclick="saveModalWebsite()">Save</button>
-            <button onclick="closeModal('editWebsiteModal')">Cancel</button>
+            <button onclick="saveModalWebsite()">保存</button>
+            <button onclick="closeModal('editWebsiteModal')">取消</button>
         </div>
     </div>
     <script src="script.js"></script>
 </body>
-</html> 
+</html>
