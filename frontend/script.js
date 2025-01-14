@@ -89,7 +89,7 @@ function renderDashboard(data) {
             websiteItem.setAttribute('data-description', website.description);
             websiteItem.innerHTML = `
                 ${website.iconPath ? `<img src="${backendUrl}${website.iconPath}" style="width: 16px; height: 16px; margin-right: 5px;">` : ''}
-                <a href="${website.url}?websiteId=${website.id}" target="_blank">${website.name}</a>
+                <a href="${website.url}" target="_blank">${website.name}</a>
                 <span style="display:none;">${website.iconPath}</span>
             `;
             websiteList.appendChild(websiteItem);
