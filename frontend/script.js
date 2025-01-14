@@ -314,15 +314,25 @@ dashboard.addEventListener('contextmenu', function (e) {
         const groupDiv = target.closest('.group');
         const groupId = groupDiv.querySelector('h2 input[id^="editGroupName-"]').getAttribute('id').match(/editGroupName-(\d+)/)[1];
         showGroupContextMenu(e, groupId);
-    } else if (target.closest('.website-item a')) {
+    } else if (target.closest('.website-item')) {
         e.preventDefault();
         const websiteItem = target.closest('.website-item');
         const groupId = websiteItem.closest('.group').querySelector('h2 input[id^="editGroupName-"]').getAttribute('id').match(/editGroupName-(\d+)/)[1];
-        const websiteUrl = target.getAttribute('href');
+        const websiteUrl = websiteItem.querySelector('a').getAttribute('href');
         const websiteIdMatch = websiteUrl.match(/websiteId=(\d+)/);
         const websiteId = websiteIdMatch ? websiteIdMatch[1] : null;
         if (websiteId) {
             showWebsiteContextMenu(e, groupId, websiteId);
+        }
+    }
+});
+
+dashboard.addEventListener('click', (e) => {
+    const target = e.target.closest('.website-item');
+    if (target) {
+        const link = target.querySelector('a');
+        if (link) {
+            window.open(link.href, '_blank');
         }
     }
 });

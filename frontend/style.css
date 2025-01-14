@@ -217,6 +217,7 @@ h1 {
     min-height: 60px;
     height: auto;
     backdrop-filter: none;
+    cursor: pointer;
 }
 
 .website-item::before {
@@ -331,11 +332,11 @@ h1 {
     transition: var(--transition);
 }
 
-.website-item a:hover {
+.website-item:hover a {
     color: var(--primary-color);
 }
 
-.website-item a:hover::after {
+.website-item:hover a::after {
     width: 100%;
 }
 
