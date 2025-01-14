@@ -688,6 +688,22 @@ h1 {
     animation: ripple 0.6s ease-out;
 }
 
+.add-buttons button:hover::before,
+.add-button-container button:hover::before {
+    content: attr(title);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--surface);
+    color: var(--text-primary);
+    padding: 0.5rem;
+    border-radius: var(--radius);
+    white-space: nowrap;
+    z-index: 101;
+    box-shadow: var(--shadow);
+}
+
 /* Context Menu Styles */
 #contextMenu {
     position: fixed;
