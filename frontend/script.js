@@ -287,7 +287,7 @@ async function deleteGroup(groupId) {
                 <p>请选择删除选项:</p>
                 <div class="modal-buttons-container">
                     <button id="permanentDelete">永久删除分组和网站</button>
-                    <button id="keepWebsites">永久删除分组</button>
+                    <button id="moveToTrash">将网站移动到回收站</button>
                     <button onclick="document.body.removeChild(this.closest('.modal'))">取消</button>
                 </div>
             </div>
@@ -295,12 +295,12 @@ async function deleteGroup(groupId) {
         document.body.appendChild(modal);
 
         document.getElementById('permanentDelete').addEventListener('click', () => {
-            resolve('permanent');
+            resolve('permanentDelete');
             document.body.removeChild(modal);
         });
 
-        document.getElementById('keepWebsites').addEventListener('click', () => {
-            resolve('keepWebsites');
+        document.getElementById('moveToTrash').addEventListener('click', () => {
+            resolve('moveToTrash');
             document.body.removeChild(modal);
         });
     });

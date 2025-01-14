@@ -169,14 +169,18 @@ app.delete('/api/groups/:groupId/websites/:websiteId', async (req, res) => {
 
 // 删除分组
 app.delete('/api/groups/:groupId', (req, res) => {
-    console.log('标记删除分组');
+    console.log('标记1删除分组');
     try {
         const { groupId } = req.params;
-        const { deleteOption } = req.query;
+        let { deleteOption } = req.query;
         const data = readData();
         const { readHistory, writeHistory } = require('./history');
 
-        if (deleteOption === 'permanent') {
+        if (!deleteOption) {
+            return res.status(400).json({ error: 'Delete option is required' });
+        }
+
+        if (deleteOption === 'permanentDelete') {
             data.groups = data.groups.filter(g => g.id !== parseInt(groupId));
             data.websites = data.websites.filter(w => w.groupId !== parseInt(groupId));
             data.order = data.order.filter(item => item.groupId !== parseInt(groupId)).map((item, index) => ({ ...item, sequence: index + 1 }));
