@@ -429,9 +429,21 @@ h1 {
     }
 }
 
-.modal-content input,
+
+.modal-content input {
+    width: 100%;
+    max-width: 90%;
+    padding: 0.75rem 1rem;
+    margin: 0.75rem 0;
+    border: 1px solid rgba(124, 58, 237, 0.2);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.9);
+    transition: all 0.3s ease;
+    font-size: 0.95rem;
+}
 .modal-content select {
     width: 100%;
+    max-width: 97%;
     padding: 0.75rem 1rem;
     margin: 0.75rem 0;
     border: 1px solid rgba(124, 58, 237, 0.2);
