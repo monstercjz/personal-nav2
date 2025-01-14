@@ -19,16 +19,30 @@ if (!fs.existsSync(iconsDir)) {
     fs.mkdirSync(iconsDir);
 }
 
+const faviconCache = {};
+
 // 获取 favicon 并保存
 async function fetchAndSaveFavicon(url) {
     try {
+        const hostname = new URL(url).hostname;
+        if (faviconCache[hostname]) {
+            console.log(`Favicon found in cache for ${hostname}`);
+            return faviconCache[hostname];
+        }
+
         const faviconUrl = new URL('/favicon.ico', url).href;
         console.log('faviconUrl', faviconUrl);
         const response = await fetch(faviconUrl, { timeout: 5000 });
         if (response.ok && response.headers.get('content-type')?.includes('image')) {
             const buffer = await response.buffer();
-            const filename = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.ico`;
+            const hostname = new URL(url).hostname;
+            const filename = `${hostname}.ico`;
             const filePath = path.join(iconsDir, filename);
+            if (fs.existsSync(filePath)) {
+                console.log(`Favicon already exists for ${url}`);
+                return `/icons/${filename}`;
+            }
+            console.log(`Saving favicon for ${url}`);
             fs.writeFileSync(filePath, buffer);
             return `/icons/${filename}`;
         }
@@ -121,10 +135,11 @@ app.post('/api/groups/:groupId/websites', async (req, res) => {
             return res.status(400).json({ error: 'Website name and URL are required' });
         }
         const data = readData();
-        const newWebsite = { id: Date.now(), name, url, description, iconPath: null, groupId: parseInt(groupId) };
+        const hostname = new URL(url).hostname;
+        const iconFilename = `${hostname}.ico`;
+        const newWebsite = { id: Date.now(), name, url, description, iconPath: `/icons/${iconFilename}`, groupId: parseInt(groupId) };
         data.websites.push(newWebsite);
-        const iconPath = await fetchAndSaveFavicon(url);
-        newWebsite.iconPath = iconPath;
+        await fetchAndSaveFavicon(url);
         writeData(data);
         res.status(201).json(newWebsite);
     } catch (error) {
@@ -148,6 +163,7 @@ app.delete('/api/groups/:groupId/websites/:websiteId', async (req, res) => {
             return res.status(404).json({ error: 'Website not found' });
         }
 
+        const iconPath = websiteToDelete.iconPath;
         if (deleteOption === 'moveToTrash') {
             const historyData = `${websiteToDelete.name}+${websiteToDelete.url}+${websiteToDelete.description}`;
             let existingHistory = readHistory();
@@ -159,6 +175,17 @@ app.delete('/api/groups/:groupId/websites/:websiteId', async (req, res) => {
         } else {
             data.websites = data.websites.filter(w => w.id !== parseInt(websiteId) || w.groupId !== parseInt(groupId));
             writeData(data);
+        }
+        const shouldDeleteIcon = (hostname) => {
+            const data = readData();
+            return !data.websites.some(website => new URL(website.url).hostname === hostname);
+        };
+        if (iconPath) {
+            const iconFile = path.join(__dirname, iconPath);
+            const hostname = new URL(websiteToDelete.url).hostname;
+            if (shouldDeleteIcon(hostname) && fs.existsSync(iconFile)) {
+                fs.unlinkSync(iconFile);
+            }
         }
         res.status(204).send();
     } catch (error) {
