@@ -693,3 +693,34 @@ document.querySelector('#pasteWebsitesModal #savePasteWebsites').addEventListene
             closeModal('pasteWebsitesModal');
         }
     });
+
+    let currentTooltip = null;
+    const tooltip = document.getElementById('tooltip');
+    if (tooltip) {
+        tooltip.remove();
+    }
+    document.addEventListener('mouseover', (e) => {
+        const target = e.target.closest('[data-tooltip]');
+        if (target) {
+            if (!currentTooltip) {
+                currentTooltip = document.createElement('div');
+                currentTooltip.id = 'tooltip';
+                document.body.appendChild(currentTooltip);
+            }
+            const tooltipText = target.getAttribute('data-tooltip');
+            currentTooltip.textContent = tooltipText;
+            currentTooltip.style.display = 'block';
+            const rect = target.getBoundingClientRect();
+            currentTooltip.style.left = `${rect.left + window.scrollX-5}px`;
+            currentTooltip.style.top = `${rect.top + window.scrollY+5 }px`;
+        }
+    });
+
+    document.addEventListener('mouseout', (e) => {
+        const target = e.target.closest('[data-tooltip]');
+        if (target && currentTooltip) {
+            currentTooltip.style.display = 'none';
+            currentTooltip.remove();
+            currentTooltip = null;
+        }
+    });
