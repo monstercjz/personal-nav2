@@ -8,7 +8,7 @@ function readData() {
         const data = fs.readFileSync(dataFilePath, 'utf8');
         return JSON.parse(data);
     } catch (err) {
-        return { groups: [] };
+        return { websites: [], groups: [], order: [] };
     }
 }
 
