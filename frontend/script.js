@@ -87,6 +87,7 @@ function renderDashboard(data) {
             const websiteItem = document.createElement('div');
             websiteItem.classList.add('website-item');
             websiteItem.setAttribute('data-description', website.description);
+            websiteItem.setAttribute('data-website-id', website.id);
             websiteItem.innerHTML = `
                 ${website.iconPath ? `<img src="${backendUrl}${website.iconPath}" style="width: 16px; height: 16px; margin-right: 5px;">` : ''}
                 <a href="${website.url}" target="_blank">${website.name}</a>
@@ -318,9 +319,7 @@ dashboard.addEventListener('contextmenu', function (e) {
         e.preventDefault();
         const websiteItem = target.closest('.website-item');
         const groupId = websiteItem.closest('.group').querySelector('h2 input[id^="editGroupName-"]').getAttribute('id').match(/editGroupName-(\d+)/)[1];
-        const websiteUrl = websiteItem.querySelector('a').getAttribute('href');
-        const websiteIdMatch = websiteUrl.match(/websiteId=(\d+)/);
-        const websiteId = websiteIdMatch ? websiteIdMatch[1] : null;
+        const websiteId = websiteItem.getAttribute('data-website-id');
         if (websiteId) {
             showWebsiteContextMenu(e, groupId, websiteId);
         }
