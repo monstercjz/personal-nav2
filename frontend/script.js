@@ -276,28 +276,86 @@ async function addWebsite() {
 
 // 删除分组
 async function deleteGroup(groupId) {
-    if (confirm('确定要删除这个分组吗？')) {
-        const response = await fetch(`${backendUrl}/groups/${groupId}`, {
+    const deleteOption = await new Promise((resolve) => {
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.style.display = 'block';
+        modal.innerHTML = `
+            <div class="modal-content">
+                <span class="close" onclick="document.body.removeChild(this.closest('.modal'))">&times;</span>
+                <h2>删除分组</h2>
+                <p>请选择删除选项:</p>
+                <div class="modal-buttons-container">
+                    <button id="permanentDelete">永久删除分组和网站</button>
+                    <button id="keepWebsites">永久删除分组</button>
+                    <button onclick="document.body.removeChild(this.closest('.modal'))">取消</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+
+        document.getElementById('permanentDelete').addEventListener('click', () => {
+            resolve('permanent');
+            document.body.removeChild(modal);
+        });
+
+        document.getElementById('keepWebsites').addEventListener('click', () => {
+            resolve('keepWebsites');
+            document.body.removeChild(modal);
+        });
+    });
+
+    if (deleteOption) {
+        const response = await fetch(`${backendUrl}/groups/${groupId}?deleteOption=${deleteOption}`, {
             method: 'DELETE'
         });
         if (response.ok) {
             fetchDataAndRender();
         } else {
-        alert('删除分组失败');
+            alert('删除分组失败');
         }
     }
 }
 
 // 删除网站
 async function deleteWebsite(groupId, websiteId) {
-    if (confirm('确定要删除这个网站吗？')) {
-        const response = await fetch(`${backendUrl}/groups/${groupId}/websites/${websiteId}`, {
+    const deleteOption = await new Promise((resolve) => {
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.style.display = 'block';
+        modal.innerHTML = `
+            <div class="modal-content">
+                <span class="close" onclick="document.body.removeChild(this.closest('.modal'))">&times;</span>
+                <h2>删除网站</h2>
+                <p>请选择删除选项:</p>
+                <div class="modal-buttons-container">
+                    <button id="permanentDelete">永久删除</button>
+                    <button id="moveToTrash">移动到回收站</button>
+                    <button onclick="document.body.removeChild(this.closest('.modal'))">取消</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+
+        document.getElementById('permanentDelete').addEventListener('click', () => {
+            resolve('permanent');
+            document.body.removeChild(modal);
+        });
+
+        document.getElementById('moveToTrash').addEventListener('click', () => {
+            resolve('moveToTrash');
+            document.body.removeChild(modal);
+        });
+    });
+
+    if (deleteOption) {
+        const response = await fetch(`${backendUrl}/groups/${groupId}/websites/${websiteId}?deleteOption=${deleteOption}`, {
             method: 'DELETE'
         });
         if (response.ok) {
             fetchDataAndRender();
         } else {
-        alert('删除网站失败');
+            alert('删除网站失败');
         }
     }
 }
@@ -714,14 +772,17 @@ document.querySelector('#pasteWebsitesModal #savePasteWebsites').addEventListene
         }
         try {
             for (const line of websites) {
-                const [name, url] = line.split(':').map(item => item.trim());
-                if (name && url) {
+                const parts = line.split('+').map(item => item.trim());
+                 if (parts.length >= 2) {
+                    const name = parts[0];
+                    const url = parts[1];
+                    const description = parts[2] || '';
                     const validatedUrl = validateAndCompleteUrl(url);
                     if (validatedUrl) {
                         await fetch(`${backendUrl}/groups/${groupId}/websites`, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ name: name, url: validatedUrl, description: '', groupId: parseInt(groupId) })
+                            body: JSON.stringify({ name: name, url: validatedUrl, description: description, groupId: parseInt(groupId) })
                         });
                     }
                 }

@@ -11,6 +11,7 @@ yarn-error.log*
 /backend/node_modules/
 /backend/icons/
 /backend/data.json
+/backend/history.json
 
 # Build directories
 /frontend/build/

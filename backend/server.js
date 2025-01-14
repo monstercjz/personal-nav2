@@ -134,13 +134,32 @@ app.post('/api/groups/:groupId/websites', async (req, res) => {
 });
 
 // 删除网页
-app.delete('/api/groups/:groupId/websites/:websiteId', (req, res) => {
+app.delete('/api/groups/:groupId/websites/:websiteId', async (req, res) => {
     console.log('标记删除网页');
     try {
         const { groupId, websiteId } = req.params;
+        const { deleteOption } = req.query;
         const data = readData();
-        data.websites = data.websites.filter(w => w.id !== parseInt(websiteId) || w.groupId !== parseInt(groupId));
-        writeData(data);
+        const { readHistory, writeHistory } = require('./history');
+
+        const websiteToDelete = data.websites.find(w => w.id === parseInt(websiteId) && w.groupId === parseInt(groupId));
+
+        if (!websiteToDelete) {
+            return res.status(404).json({ error: 'Website not found' });
+        }
+
+        if (deleteOption === 'moveToTrash') {
+            const historyData = `${websiteToDelete.name}+${websiteToDelete.url}+${websiteToDelete.description}`;
+            let existingHistory = readHistory();
+            const updatedHistory = [...existingHistory, historyData];
+            writeHistory(updatedHistory);
+
+            data.websites = data.websites.filter(w => w.id !== parseInt(websiteId) || w.groupId !== parseInt(groupId));
+            writeData(data);
+        } else {
+            data.websites = data.websites.filter(w => w.id !== parseInt(websiteId) || w.groupId !== parseInt(groupId));
+            writeData(data);
+        }
         res.status(204).send();
     } catch (error) {
         console.error('Error deleting website:', error);
@@ -153,15 +172,53 @@ app.delete('/api/groups/:groupId', (req, res) => {
     console.log('标记删除分组');
     try {
         const { groupId } = req.params;
+        const { deleteOption } = req.query;
         const data = readData();
-        data.groups = data.groups.filter(g => g.id !== parseInt(groupId));
-        data.websites = data.websites.filter(w => w.groupId !== parseInt(groupId));
-        data.order = data.order.filter(item => item.groupId !== parseInt(groupId)).map((item, index) => ({ ...item, sequence: index + 1 }));
-        writeData(data);
+        const { readHistory, writeHistory } = require('./history');
+
+        if (deleteOption === 'permanent') {
+            data.groups = data.groups.filter(g => g.id !== parseInt(groupId));
+            data.websites = data.websites.filter(w => w.groupId !== parseInt(groupId));
+            data.order = data.order.filter(item => item.groupId !== parseInt(groupId)).map((item, index) => ({ ...item, sequence: index + 1 }));
+            writeData(data);
+        } else if (deleteOption === 'moveToTrash') {
+            const deletedWebsites = data.websites.filter(w => w.groupId === parseInt(groupId));
+            const historyData = [];
+            deletedWebsites.forEach(website => {
+                historyData.push(`${website.name}+${website.url}+${website.description}`);
+            });
+
+            let existingHistory = readHistory();
+            const updatedHistory = [...existingHistory, ...historyData];
+            writeHistory(updatedHistory);
+
+            data.groups = data.groups.filter(g => g.id !== parseInt(groupId));
+            data.websites = data.websites.filter(w => w.groupId !== parseInt(groupId));
+            data.order = data.order.filter(item => item.groupId !== parseInt(groupId)).map((item, index) => ({ ...item, sequence: index + 1 }));
+            writeData(data);
+        }
+         else {
+            return res.status(400).json({ error: 'Invalid delete option' });
+        }
         res.status(204).send();
     } catch (error) {
         console.error('Error deleting group:', error);
         res.status(500).json({ error: 'Failed to delete group' });
+    }
+});
+
+// 删除网页
+app.delete('/api/groups/:groupId/websites/:websiteId', (req, res) => {
+    console.log('标记删除网页');
+    try {
+        const { groupId, websiteId } = req.params;
+        const data = readData();
+        data.websites = data.websites.filter(w => w.id !== parseInt(websiteId) || w.groupId !== parseInt(groupId));
+        writeData(data);
+        res.status(204).send();
+    } catch (error) {
+        console.error('Error deleting website:', error);
+        res.status(500).json({ error: 'Failed to delete website' });
     }
 });
 
