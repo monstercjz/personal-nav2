@@ -46,6 +46,11 @@ function showNotification(message, type = 'info') {
     const notification = document.createElement('div');
     notification.className = `notification ${type}`;
     notification.textContent = message;
+    notification.style.position = 'fixed';
+    notification.style.top = '20px';
+    notification.style.right = '20px';
+    notification.style.transform = 'translateX(0)';
+    notification.style.zIndex = '1000';
     document.body.appendChild(notification);
     
     // Animate in
@@ -55,7 +60,7 @@ function showNotification(message, type = 'info') {
         notification.style.transform = 'translateY(0)';
         notification.style.opacity = '1';
     }, 10);
-
+    
     // Remove after 3 seconds
     setTimeout(() => {
         notification.style.opacity = '0';
