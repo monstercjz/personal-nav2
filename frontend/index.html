@@ -67,8 +67,10 @@
             <span class="close" onclick="closeModal('addGroupModal')">&times;</span>
             <h2>添加分组</h2>
             <input type="text" id="newGroupName" placeholder="新分组名称">
-            <button onclick="addGroup()" aria-label="添加新分组">添加分组</button>
-            <button onclick="closeModal('addGroupModal')" aria-label="取消创建分组">取消</button>
+            <div class="modal-buttons-container">
+                <button onclick="addGroup()" aria-label="添加新分组">添加分组</button>
+                <button onclick="closeModal('addGroupModal')" aria-label="取消创建分组">取消</button>
+            </div>
         </div>
     </div>
     <div class="modal" id="addWebsiteModal" style="display:none;">
@@ -81,8 +83,10 @@
             <select id="groupSelect">
                 <option value="">选择分组</option>
             </select>
-            <button onclick="addWebsite()" aria-label="添加新网站">添加网站</button>
-            <button onclick="closeModal('addWebsiteModal')" aria-label="取消创建网站">取消</button>
+            <div class="modal-buttons-container">
+                <button onclick="addWebsite()" aria-label="添加新网站">添加网站</button>
+                <button onclick="closeModal('addWebsiteModal')" aria-label="取消创建网站">取消</button>
+            </div>
         </div>
     </div>
     <div class="modal" id="editGroupModal" style="display:none;">
@@ -90,8 +94,10 @@
             <span class="close" onclick="closeModal('editGroupModal')">&times;</span>
             <h2>编辑分组</h2>
             <input type="text" id="modalEditGroupName" placeholder="新分组名称" style="user-select: text;">
-            <button onclick="saveModalGroup()">保存</button>
-            <button onclick="closeModal('editGroupModal')">取消</button>
+            <div class="modal-buttons-container">
+                <button onclick="saveModalGroup()">保存</button>
+                <button onclick="closeModal('editGroupModal')">取消</button>
+            </div>
         </div>
     </div>
     <div class="modal" id="editWebsiteModal" style="display:none;">
@@ -104,8 +110,21 @@
             <select id="modalEditWebsiteGroup" style="user-select: text;">
                 <option value="">选择分组</option>
             </select>
-            <button onclick="saveModalWebsite()">保存</button>
-            <button onclick="closeModal('editWebsiteModal')">取消</button>
+            <div class="modal-buttons-container">
+                <button onclick="saveModalWebsite()">保存</button>
+                <button onclick="closeModal('editWebsiteModal')">取消</button>
+            </div>
+        </div>
+    </div>
+    <div class="modal" id="pasteWebsitesModal" style="display:none;">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('pasteWebsitesModal')">&times;</span>
+            <h2>粘贴导入网站</h2>
+            <textarea placeholder="请粘贴网站列表，格式为 网站名:网站地址，一行一个" style="width: 100%; height: 200px;"></textarea>
+            <div class="modal-buttons-container" style="margin-top: 10px;">
+                <button id="savePasteWebsites">保存</button>
+                <button id="cancelPasteWebsites" style="margin-left: 10px;">取消</button>
+            </div>
         </div>
     </div>
     <script src="script.js"></script>

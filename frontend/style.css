@@ -462,6 +462,12 @@ h1 {
     overflow: hidden;
 }
 
+.modal-buttons-container {
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-end;
+}
+
 .modal-content button:hover {
     background: var(--primary-hover);
     transform: translateY(-2px);

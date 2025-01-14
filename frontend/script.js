@@ -641,60 +641,20 @@ exportDataButton.addEventListener('click', async () => {
 
 const importWebsitesButton = document.getElementById('importWebsites');
 
-const modal = document.createElement('div');
-modal.className = 'modal';
-modal.style.display = 'none';
-modal.id = 'pasteWebsitesModal';
-
-const modalContent = document.createElement('div');
-modalContent.className = 'modal-content';
-modal.appendChild(modalContent);
-
-const closeButton = document.createElement('span');
-closeButton.className = 'close';
-closeButton.innerHTML = '&times;';
-closeButton.onclick = () => closeModal('pasteWebsitesModal');
-modalContent.appendChild(closeButton);
-
-const heading = document.createElement('h2');
-heading.textContent = '粘贴导入网站';
-modalContent.appendChild(heading);
-
-const textarea = document.createElement('textarea');
-textarea.placeholder = '请粘贴网站列表，格式为 网站名:网站地址，一行一个';
-textarea.style.width = '100%';
-textarea.style.height = '200px';
-modalContent.appendChild(textarea);
-
-const buttonContainer = document.createElement('div');
-buttonContainer.style.marginTop = '10px';
-modalContent.appendChild(buttonContainer);
-
-const saveButton = document.createElement('button');
-saveButton.textContent = '保存';
-buttonContainer.appendChild(saveButton);
-
-const cancelButton = document.createElement('button');
-cancelButton.textContent = '取消';
-cancelButton.style.marginLeft = '10px';
-buttonContainer.appendChild(cancelButton);
-
-document.body.appendChild(modal);
-
 importWebsitesButton.addEventListener('click', () => {
-    modal.style.display = 'block';
-    textarea.focus();
+    document.getElementById('pasteWebsitesModal').style.display = 'block';
+    document.querySelector('#pasteWebsitesModal textarea').focus();
 });
 
-cancelButton.addEventListener('click', () => {
+document.querySelector('#pasteWebsitesModal #cancelPasteWebsites').addEventListener('click', () => {
     closeModal('pasteWebsitesModal');
 });
 
-saveButton.addEventListener('click', async () => {
-        const websites = textarea.value.trim().split('\n').filter(line => line.trim() !== '');
+document.querySelector('#pasteWebsitesModal #savePasteWebsites').addEventListener('click', async () => {
+        const websites = document.querySelector('#pasteWebsitesModal textarea').value.trim().split('\n').filter(line => line.trim() !== '');
         if (websites.length === 0) {
             showNotification('没有检测到网站', 'error');
-            document.body.removeChild(container);
+            closeModal('pasteWebsitesModal');
             return;
         }
         const now = new Date();
@@ -707,7 +667,7 @@ saveButton.addEventListener('click', async () => {
             });
             if (!createGroupResponse.ok) {
                 showNotification('创建分组失败', 'error');
-                document.body.removeChild(container);
+                closeModal('pasteWebsitesModal');
                 return;
             }
             const newGroup = await createGroupResponse.json();
@@ -726,10 +686,10 @@ saveButton.addEventListener('click', async () => {
             }
             showNotification('网站导入成功', 'success');
             fetchDataAndRender();
-            document.body.removeChild(container);
+            closeModal('pasteWebsitesModal');
         } catch (error) {
             console.error('Failed to import websites:', error);
             showNotification('网站导入失败', 'error');
-            document.body.removeChild(container);
+            closeModal('pasteWebsitesModal');
         }
     });
