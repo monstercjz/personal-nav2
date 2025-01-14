@@ -651,9 +651,23 @@ exportDataButton.addEventListener('click', async () => {
 
 const importWebsitesButton = document.getElementById('importWebsites');
 
-importWebsitesButton.addEventListener('click', () => {
-    document.getElementById('pasteWebsitesModal').style.display = 'block';
+importWebsitesButton.addEventListener('click', async () => {
+    const modal = document.getElementById('pasteWebsitesModal');
+    modal.style.display = 'block';
     document.querySelector('#pasteWebsitesModal textarea').focus();
+    const groupSelect = document.getElementById('pasteWebsitesGroupSelect');
+    if (!groupsData) {
+        await fetchAndRenderGroupSelect();
+    }
+    groupSelect.innerHTML = '<option value="">选择分组</option>';
+    const fragment = document.createDocumentFragment();
+    groupsData.groups.forEach(group => {
+        const option = document.createElement('option');
+        option.value = group.id;
+        option.textContent = group.name;
+        fragment.appendChild(option);
+    });
+    groupSelect.appendChild(fragment);
 });
 
 document.querySelector('#pasteWebsitesModal #cancelPasteWebsites').addEventListener('click', () => {
@@ -667,26 +681,39 @@ document.querySelector('#pasteWebsitesModal #savePasteWebsites').addEventListene
             closeModal('pasteWebsitesModal');
             return;
         }
-        const now = new Date();
-        const groupName = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`;
-        try {
-            const createGroupResponse = await fetch(`${backendUrl}/groups`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name: groupName })
-            });
-            if (!createGroupResponse.ok) {
+        const selectedGroupId = document.getElementById('pasteWebsitesGroupSelect').value;
+        let groupId = selectedGroupId;
+        let newGroup;
+        if (!groupId) {
+            const now = new Date();
+            const groupName = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`;
+            try {
+                const createGroupResponse = await fetch(`${backendUrl}/groups`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: groupName })
+                });
+                if (!createGroupResponse.ok) {
+                    showNotification('创建分组失败', 'error');
+                    closeModal('pasteWebsitesModal');
+                    return;
+                }
+                newGroup = await createGroupResponse.json();
+                groupId = newGroup.id;
+            } catch (error) {
+                console.error('Failed to create group:', error);
                 showNotification('创建分组失败', 'error');
                 closeModal('pasteWebsitesModal');
                 return;
             }
-            const newGroup = await createGroupResponse.json();
+        }
+        try {
             for (const line of websites) {
                 const [name, url] = line.split(':').map(item => item.trim());
                 if (name && url) {
                     const validatedUrl = validateAndCompleteUrl(url);
                     if (validatedUrl) {
-                        await fetch(`${backendUrl}/groups/${newGroup.id}/websites`, {
+                        await fetch(`${backendUrl}/groups/${groupId}/websites`, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ name: name, url: validatedUrl, description: '' })
