@@ -30,6 +30,8 @@ const Joi = require('joi');
 const logger = require('../utils/logger');
 
 const createGroup = async (groupData) => {
+  console.log('createGroup called');
+  console.log('createGroup called'.groupData);
   const schema = Joi.object({
     name: Joi.string().required(),
     isCollapsible: Joi.boolean().required()

@@ -17,6 +17,12 @@
       "name": "ѧ1",
       "order": 4,
       "isCollapsible": true
+    },
+    {
+      "id": "09b87b6d-2869-4bfe-b8c2-3cd37a5ccc20",
+      "name": "123",
+      "order": 5,
+      "isCollapsible": true
     }
   ],
   "websites": [
@@ -43,6 +49,6 @@
       "isAccessible": true
     }
   ],
-  "nextGroupId": 5,
+  "nextGroupId": 6,
   "nextWebsiteId": 7
 }

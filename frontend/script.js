@@ -16,7 +16,7 @@ toggleThemeButton.addEventListener('click', () => {
 });
 
 const dashboard = document.getElementById('dashboard');
-const backendUrl = 'http://localhost:3000/api';
+const backendUrl = 'http://localhost:3000';
 const groupSelect = document.getElementById('groupSelect');
 let groupsData = null;
 
@@ -29,10 +29,32 @@ const showAddWebsite = document.getElementById('showAddWebsite');
 async function fetchDataAndRender() {
     try {
         dashboard.classList.add('loading');
-        const response = await fetch(`${backendUrl}/data`);
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-        const { websites, groups, order } = await response.json();
-        renderDashboard({ websites, groups, order });
+        const groupsResponse = await fetch(`${backendUrl}/groups`);
+        if (!groupsResponse.ok) {
+            throw new Error(`HTTP error! status: ${groupsResponse.status}`);
+        }
+        let responseData = await groupsResponse.json();
+        let groups = responseData.data;
+        console.log('Groups:', groups);
+        if (!Array.isArray(groups)) {
+            console.error('Groups data is not an array:', responseData);
+            groups = [];
+        }
+
+        let websites = [];
+        for (const group of groups) {
+            const websitesResponse = await fetch(`${backendUrl}/websites/groups/${group.id}/websites`);
+            if (websitesResponse.ok) {
+                const groupWebsites = await websitesResponse.json();
+                let groupWebsite = groupWebsites.data;
+                console.log('Websites for group', group.id, ':', groupWebsite);
+                websites = websites.concat(groupWebsite);
+            } else {
+                 console.error(`Failed to fetch websites for group ${group.id}:`, websitesResponse.status);
+            }
+        }
+        console.log('Websites:', websites);
+        renderDashboard({ websites, groups });
         showNotification('数据加载成功', 'success');
     } catch (error) {
         console.error('Failed to fetch data:', error);
@@ -69,11 +91,11 @@ function showNotification(message, type = 'info') {
 }
 
 // 渲染仪表盘
-function renderDashboard({ websites, groups, order }) {
+function renderDashboard({ websites, groups }) {
     dashboard.innerHTML = '';
     const fragment = document.createDocumentFragment();
     
-    const orderedGroups = Array.isArray(order) ? order.map(item => groups?.find(group => group.id === item.groupId)).filter(Boolean) : (groups || []);
+    const orderedGroups = (groups || []).sort((a, b) => a.order - b.order);
 
     orderedGroups.forEach(group => {
         const groupDiv = document.createElement('div');
@@ -148,7 +170,7 @@ async function saveGroupOrder() {
     const response = await fetch(`${backendUrl}/data`);
     const data = await response.json();
     const orderedGroups = groupIds.map(id => ({ groupId: id, sequence: groupIds.indexOf(id) + 1 }));
-    const updateResponse = await fetch(`${backendUrl}/groups/order`, {
+    const updateResponse = await fetch(`${backendUrl}/groups/reorder`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ order: orderedGroups })
@@ -174,8 +196,12 @@ function renderGroupSelect(data) {
 // 获取分组数据并渲染下拉框
 async function fetchAndRenderGroupSelect() {
     try {
-        const response = await fetch(`${backendUrl}/data`);
-        const { groups } = await response.json();
+        const response = await fetch(`${backendUrl}/groups`);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const responseData = await response.json();
+        const groups = responseData.data;
         groupsData = { groups };
         renderGroupSelect(groupsData);
     } catch (error) {
@@ -197,7 +223,7 @@ async function addGroup() {
         const response = await fetch(`${backendUrl}/groups`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name: newGroupName })
+            body: JSON.stringify({ name: newGroupName, isCollapsible: false })
         });
         
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
@@ -257,7 +283,7 @@ async function addWebsite() {
         }
     }
 
-    const addWebsiteResponse = await fetch(`${backendUrl}/groups/${groupId}/websites`, {
+    const addWebsiteResponse = await fetch(`${backendUrl}/websites/groups/${groupId}/websites`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: newWebsiteName, url: newWebsiteUrl, description: newWebsiteDescription })
@@ -349,8 +375,10 @@ async function deleteWebsite(groupId, websiteId) {
     });
 
     if (deleteOption) {
-        const response = await fetch(`${backendUrl}/groups/${groupId}/websites/${websiteId}?deleteOption=${deleteOption}`, {
-            method: 'DELETE'
+        const response = await fetch(`${backendUrl}/websites/${websiteId}`, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ deleteOption })
         });
         if (response.ok) {
             fetchDataAndRender();
@@ -503,10 +531,10 @@ async function saveModalGroup() {
         alert('请输入新的分组名称');
         return;
     }
-    const response = await fetch(`${backendUrl}/groups/${groupId}`, {
+    const response = await fetch(`${backendUrl}/groups`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: newGroupName })
+        body: JSON.stringify({ name: newGroupName, isCollapsible: false })
     });
     if (response.ok) {
         fetchDataAndRender();
@@ -582,7 +610,7 @@ async function saveModalWebsite() {
     let response;
      if (parseInt(updateGroupId) !== parseInt(groupId)) {
         // 先删除旧分组的网站
-        response = await fetch(`${backendUrl}/groups/${groupId}/websites/${websiteId}`, {
+        response = await fetch(`${backendUrl}/websites/groups/${groupId}/websites/${websiteId}`, {
             method: 'DELETE'
         });
         if (!response.ok) {
@@ -590,13 +618,13 @@ async function saveModalWebsite() {
             return;
         }
         // 再添加新分组的网站
-        response = await fetch(`${backendUrl}/groups/${updateGroupId}/websites`, {
+        response = await fetch(`${backendUrl}/websites/groups/${updateGroupId}/websites`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ name: modalEditWebsiteName, url: modalEditWebsiteUrl, description: modalEditWebsiteDescription })
         });
     } else {
-         response = await fetch(`${backendUrl}/groups/${updateGroupId}/websites/${websiteId}`, {
+         response = await fetch(`${backendUrl}/websites/${websiteId}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ name: modalEditWebsiteName, url: modalEditWebsiteUrl, description: modalEditWebsiteDescription })
@@ -610,13 +638,13 @@ async function saveModalWebsite() {
             let updateResponse;
              if (parseInt(updateGroupId) !== parseInt(groupId)) {
                 const data = await response.json();
-                updateResponse = await fetch(`${backendUrl}/groups/${updateGroupId}/websites/${data.id}`, {
+                updateResponse = await fetch(`${backendUrl}/websites/groups/${updateGroupId}/websites/${data.id}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ name: modalEditWebsiteName, url: modalEditWebsiteUrl, description: modalEditWebsiteDescription, iconPath: iconData.iconPath })
                 });
             } else {
-                 updateResponse = await fetch(`${backendUrl}/groups/${updateGroupId}/websites/${websiteId}`, {
+                 updateResponse = await fetch(`${backendUrl}/websites/groups/${updateGroupId}/websites/${websiteId}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ name: modalEditWebsiteName, url: modalEditWebsiteUrl, description: modalEditWebsiteDescription, iconPath: iconData.iconPath })
@@ -779,7 +807,7 @@ document.querySelector('#pasteWebsitesModal #savePasteWebsites').addEventListene
                     const description = parts[2] || '';
                     const validatedUrl = validateAndCompleteUrl(url);
                     if (validatedUrl) {
-                        await fetch(`${backendUrl}/groups/${groupId}/websites`, {
+                        await fetch(`${backendUrl}/websites/groups/${groupId}/websites`, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ name: name, url: validatedUrl, description: description, groupId: parseInt(groupId) })

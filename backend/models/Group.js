@@ -27,8 +27,9 @@ class Group {
         this.id = id;
         this.name = name;
         this.order = order;
-        this.isCollapsible = isCollapsible;
+        this.isCollapsible = isCollapsible ?? false;
     }
+
 }
 
 module.exports = Group;
