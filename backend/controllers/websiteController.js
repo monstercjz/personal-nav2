@@ -46,7 +46,7 @@ const getWebsiteById = async (req, res) => {
  */
 const updateWebsite = async (req, res) => {
   try {
-    const website = await websiteService.updateWebsite(req.params.websiteId, req.body);
+    const website = await websiteService.updateWebsite(req.params.websiteId, { ...req.body, groupId: req.body.groupId });
     if (!website) {
       return apiResponse.error(res, 'Website not found', 404);
     }

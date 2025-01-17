@@ -3,14 +3,14 @@ const Group = require('../models/Group');
 const fileHandler = require('../utils/fileHandler');
 const { v4: uuidv4 } = require('uuid');
 
-const dataFilePath = 'backend/data/sites-data.json';
+const dataFilePath = `${__dirname}/../data/sites-data.json`;
 
 /**
  * @description 获取所有分组
  */
 const getAllGroups = async () => {
   const data = await fileHandler.readData(dataFilePath);
-  return data.groups || [];
+  return (data.groups || []).map(group => new Group(group.id, group.name, group.order));
 };
 
 /**
@@ -18,8 +18,8 @@ const getAllGroups = async () => {
  */
 const createGroup = async (groupData) => {
   const data = await fileHandler.readData(dataFilePath);
-  const newGroup = { id: uuidv4(), order: data.nextGroupId, ...groupData };
-  data.groups = [...(data.groups || []), newGroup];
+  const newGroup = new Group(uuidv4(), groupData.name, data.nextGroupId);
+  data.groups = [...(data.groups || []), newGroup]
   data.nextGroupId = data.nextGroupId + 1;
   await fileHandler.writeData(dataFilePath, data);
   return newGroup;
@@ -30,7 +30,8 @@ const createGroup = async (groupData) => {
  */
 const getGroupById = async (groupId) => {
   const data = await fileHandler.readData(dataFilePath);
-  return (data.groups || []).find((group) => group.id === groupId);
+  const groupData = (data.groups || []).find((group) => group.id === groupId);
+  return groupData ? new Group(groupData.id, groupData.name, groupData.order) : undefined;
 };
 
 /**
@@ -38,12 +39,16 @@ const getGroupById = async (groupId) => {
  */
 const updateGroup = async (groupId, groupData) => {
   const data = await fileHandler.readData(dataFilePath);
-  const groups = (data.groups || []).map((group) =>
-    group.id === groupId ? { ...group, ...groupData } : group
-  );
-  data.groups = groups;
+  const updatedGroups = (data.groups || []).map(group => {
+    if (group.id === groupId) {
+      const updatedGroup = new Group(group.id, groupData.name, group.order);
+      return updatedGroup;
+    }
+    return new Group(group.id, group.name, group.order);
+  });
+  data.groups = updatedGroups;
   await fileHandler.writeData(dataFilePath, data);
-  return groups.find(group => group.id === groupId);
+  return updatedGroups.find(group => group.id === groupId);
 };
 
 /**
@@ -52,7 +57,7 @@ const updateGroup = async (groupId, groupData) => {
 const deleteGroup = async (groupId) => {
   const data = await fileHandler.readData(dataFilePath);
   let groups = (data.groups || []).filter((group) => group.id !== groupId);
-  groups = groups.map((group, index) => ({ ...group, order: index + 1 }));
+  groups = groups.map((group, index) => new Group(group.id, group.name, index + 1));
   data.groups = groups;
   data.nextGroupId = groups.length + 1;
   await fileHandler.writeData(dataFilePath, data);
@@ -65,7 +70,10 @@ const deleteGroup = async (groupId) => {
 const reorderGroups = async (reorderData) => {
     const data = await fileHandler.readData(dataFilePath);
     const groups = data.groups || [];
-    const orderedGroups = reorderData.map(item => groups.find(group => group.id === item.id));
+    const orderedGroups = reorderData.map(item => {
+      const groupData = groups.find(group => group.id === item.id);
+      return groupData ? new Group(groupData.id, groupData.name, item.order) : undefined;
+    });
     data.groups = orderedGroups;
     await fileHandler.writeData(dataFilePath, data);
     return orderedGroups;

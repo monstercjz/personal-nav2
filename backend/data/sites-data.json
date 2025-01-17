@@ -1,6 +1,40 @@
 {
-  "groups": [],
-  "websites": [],
-  "nextGroupId": 1,
-  "nextWebsiteId": 1
+  "groups": [
+    {
+      "id": "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d",
+      "name": "工作",
+      "order": 1
+    },
+    {
+      "id": "a1b2c3d4-5e6f-7a8b-9c0d-1e2f3a4b5c6d",
+      "name": "娱乐",
+      "order": 2
+    }
+  ],
+  "websites": [
+    {
+      "id": "79363ba1-a77c-4e8b-b872-e6dabb5d88ed",
+      "groupId": "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d",
+      "name": "Test Website",
+      "url": "https://www.test.com",
+      "description": "This is a test website",
+      "faviconUrl": "https://www.google.com/s2/favicons?sz=64&domain_url=https%3A%2F%2Fwww.test.com",
+      "lastAccessTime": "2025-01-17T00:40:17.471Z",
+      "order": 4,
+      "isAccessible": true
+    },
+    {
+      "id": "d7d5a924-b0f7-4ebc-9ea1-a0d20cc6e189",
+      "groupId": "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d",
+      "name": "Test Website 4",
+      "url": "https://www.test4.com",
+      "description": "This is a test website 4",
+      "faviconUrl": "https://www.google.com/s2/favicons?sz=64&domain_url=https%3A%2F%2Fwww.test4.com",
+      "lastAccessTime": "2025-01-17T00:52:55.388Z",
+      "order": 4,
+      "isAccessible": true
+    }
+  ],
+  "nextGroupId": 3,
+  "nextWebsiteId": 7
 }

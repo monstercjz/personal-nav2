@@ -4,6 +4,16 @@ const router = express.Router();
 const websiteController = require('../controllers/websiteController');
 
 /**
+ * @route DELETE /websites/batch
+ * @description 批量删除网站记录
+ */
+router.delete('/batch', websiteController.batchDeleteWebsites);
+/**
+ * @route PATCH /websites/batch-move
+ * @description 批量移动网站记录到其他分组
+ */
+router.patch('/batch-move', websiteController.batchMoveWebsites);
+/**
  * @route GET /groups/:groupId/websites
  * @description 获取某个分组下的所有网站记录
  */
@@ -28,20 +38,5 @@ router.put('/:websiteId', websiteController.updateWebsite);
  * @description 删除网站记录
  */
 router.delete('/:websiteId', websiteController.deleteWebsite);
-/**
- * @route PATCH /websites/reorder
- * @description 网站记录排序
- */
-router.patch('/reorder', websiteController.reorderWebsites);
-/**
- * @route DELETE /websites/batch
- * @description 批量删除网站记录
- */
-router.delete('/batch', websiteController.batchDeleteWebsites);
-/**
- * @route PATCH /websites/batch-move
- * @description 批量移动网站记录到其他分组
- */
-router.patch('/batch-move', websiteController.batchMoveWebsites);
 
 module.exports = router;
