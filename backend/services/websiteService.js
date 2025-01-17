@@ -8,7 +8,7 @@ const Joi = require('joi');
 const { getGroupById } = require('./groupService');
 const logger = require('../utils/logger');
 
-const dataFilePath = `${__dirname}/../data/sites-data.json`;
+const { WEBSITE_DATA_FILE_PATH } = require('../config/constants');
 
 /**
  * @description 处理服务层错误
@@ -43,7 +43,7 @@ navigationLinks: []
   }
 
   try {
-    const data = await fileHandler.readData(dataFilePath);
+    const data = await fileHandler.readData(WEBSITE_DATA_FILE_PATH);
     const websites = _getWebsitesByGroupId(groupId, data.websites || []);
     logger.info(`获取分组 ID 为 ${groupId} 的网站，共 ${websites.length} 条`);
     return websites;
@@ -66,7 +66,7 @@ const getWebsiteById = async (websiteId) => {
   } catch (error) {
     handleServiceError(error, '无效的 websiteId');
   }
-  const data = await fileHandler.readData(dataFilePath);
+  const data = await fileHandler.readData(WEBSITE_DATA_FILE_PATH);
   const websiteData = (data.websites || []).find((website) => website.id === websiteId);
   if (websiteData) {
     logger.info(`获取网站 ID 为 ${websiteId} 的信息`);
@@ -94,12 +94,12 @@ const createWebsite = async (groupId, websiteData) => {
   }
 
   try {
-    const data = await fileHandler.readData(dataFilePath);
+    const data = await fileHandler.readData(WEBSITE_DATA_FILE_PATH);
     await _checkIfWebsiteUrlExists(data.websites || [], websiteData.url);
     const websitesInGroup = (data.websites || []).filter(website => website.groupId === groupId);
     const newWebsite = createNewWebsiteObject(groupId, websiteData, websitesInGroup);
     data.websites = [...(data.websites || []), newWebsite];
-    await fileHandler.writeData(dataFilePath, data);
+    await fileHandler.writeData(WEBSITE_DATA_FILE_PATH, data);
     logger.info(`创建新的网站: ${newWebsite.name} (ID: ${newWebsite.id}), 分组 ID: ${groupId}`);
     return newWebsite;
   } catch (error) {
@@ -136,10 +136,10 @@ const updateWebsite = async (websiteId, websiteData) => {
   }
 
   try {
-    const data = await fileHandler.readData(dataFilePath);
+    const data = await fileHandler.readData(WEBSITE_DATA_FILE_PATH);
     const updatedWebsites = _updateWebsiteData(websiteId, websiteData, data.websites || []);
     data.websites = updatedWebsites;
-    await fileHandler.writeData(dataFilePath, data);
+    await fileHandler.writeData(WEBSITE_DATA_FILE_PATH, data);
     const updatedWebsite = updatedWebsites.find(website => website.id === websiteId);
     if (updatedWebsite) {
       logger.info(`更新网站: ${updatedWebsite.name} (ID: ${websiteId})`);
@@ -168,10 +168,10 @@ const deleteWebsite = async (websiteId) => {
   } catch (error) {
     handleServiceError(error, '无效的 websiteId');
   }
-  const data = await fileHandler.readData(dataFilePath);
+  const data = await fileHandler.readData(WEBSITE_DATA_FILE_PATH);
   const deletedWebsite = (data.websites || []).find(website => website.id === websiteId);
   data.websites = (data.websites || []).filter(website => website.id !== websiteId);
-  await fileHandler.writeData(dataFilePath, data);
+  await fileHandler.writeData(WEBSITE_DATA_FILE_PATH, data);
   if (deletedWebsite) {
     logger.info(`删除网站: ${deletedWebsite.name} (ID: ${websiteId})`);
     return { message: 'Website deleted successfully' };
@@ -199,7 +199,7 @@ const reorderWebsites = async (reorderData) => {
     handleServiceError(error, '无效的排序数据');
   }
 
-  const data = await fileHandler.readData(dataFilePath);
+  const data = await fileHandler.readData(WEBSITE_DATA_FILE_PATH);
   const rawWebsites = data.websites || [];
   const websiteMap = rawWebsites.reduce((map, website) => {
     map[website.id] = website;
@@ -213,7 +213,7 @@ const reorderWebsites = async (reorderData) => {
 
   const orderedWebsites = [...rawWebsites].sort((a, b) => orderMap[a.id] - orderMap[b.id]).map(website => new Website(website.id, website.groupId, website.name, website.url, website.description, website.faviconUrl, website.lastAccessTime, website.order, website.isAccessible));
   data.websites = orderedWebsites;
-  await fileHandler.writeData(dataFilePath, data);
+  await fileHandler.writeData(WEBSITE_DATA_FILE_PATH, data);
   logger.info(`重新排序网站，共 ${orderedWebsites.length} 条`);
   return orderedWebsites;
 };
@@ -240,13 +240,13 @@ const batchDeleteWebsites = async (websiteIds) => {
     handleServiceError(error, '无效的网站 ID 列表');
   }
 
-  const data = await fileHandler.readData(dataFilePath);
+  const data = await fileHandler.readData(WEBSITE_DATA_FILE_PATH);
   let websites = (data.websites || []).map(website => new Website(website.id, website.groupId, website.name, website.url, website.description, website.faviconUrl, website.lastAccessTime, website.order, website.isAccessible));
   let deletedCount = 0;
   const filteredWebsites = websites.filter(website => !websiteIds.includes(website.id));
   deletedCount = websites.length - filteredWebsites.length;
   data.websites = filteredWebsites;
-  await fileHandler.writeData(dataFilePath, data);
+  await fileHandler.writeData(WEBSITE_DATA_FILE_PATH, data);
   logger.info(`批量删除网站，成功删除 ${deletedCount} 条`);
   return deletedCount;
 };
@@ -277,10 +277,10 @@ const batchMoveWebsites = async (websiteIds, targetGroupId) => {
   }
 
   try {
-    const data = await fileHandler.readData(dataFilePath);
+    const data = await fileHandler.readData(WEBSITE_DATA_FILE_PATH);
     const updatedWebsites = _moveWebsitesToGroup(websiteIds, targetGroupId, data.websites || []);
     data.websites = updatedWebsites;
-    await fileHandler.writeData(dataFilePath, data);
+    await fileHandler.writeData(WEBSITE_DATA_FILE_PATH, data);
     const movedCount = updatedWebsites.filter(website => websiteIds.includes(website.id)).length;
     logger.info(`批量移动网站，成功移动 ${movedCount} 条到分组 ID: ${targetGroupId}`);
     return movedCount;
@@ -381,7 +381,7 @@ const createNewWebsiteObject = (groupId, websiteData, websitesInGroup) => {
  * @returns {Promise<Website>} - 找到的网站数据
  */
 const _findWebsiteById = async (websiteId) => {
-  const data = await fileHandler.readData(dataFilePath);
+  const data = await fileHandler.readData(WEBSITE_DATA_FILE_PATH);
   const websiteData = (data.websites || []).find((website) => website.id === websiteId);
   if (!websiteData) {
     handleServiceError(new Error('找不到指定的网站'), '更新网站记录失败');

@@ -5,14 +5,14 @@ const Group = require('../models/Group');
 const fileHandler = require('../utils/fileHandler');
 const { v4: uuidv4 } = require('uuid');
 
-const dataFilePath = `${__dirname}/../data/sites-data.json`;
+const { GROUP_DATA_FILE_PATH } = require('../config/constants');
 
 /**
  * @description 获取所有分组
  * @returns {Promise<Array<Group>>} 所有分组的数组
  */
 const getAllGroups = async () => {
-  const data = await fileHandler.readData(dataFilePath);
+  const data = await fileHandler.readData(GROUP_DATA_FILE_PATH);
   return (data.groups || [])
     .filter(group => typeof group.isCollapsible === 'boolean')
     .map(group => new Group(group.id, group.name, group.order, group.isCollapsible));
@@ -37,11 +37,11 @@ const createGroup = async (groupData) => {
 
   try {
     await schema.validateAsync(groupData);
-    const data = await fileHandler.readData(dataFilePath);
+    const data = await fileHandler.readData(GROUP_DATA_FILE_PATH);
     const newGroup = new Group(uuidv4(), groupData.name, data.nextGroupId, groupData.isCollapsible);
     data.groups = [...(data.groups || []), newGroup];
     data.nextGroupId = data.nextGroupId + 1;
-    await fileHandler.writeData(dataFilePath, data);
+    await fileHandler.writeData(GROUP_DATA_FILE_PATH, data);
     logger.info(`Group created: ${newGroup.id} - ${newGroup.name}`);
     return newGroup;
   } catch (error) {
@@ -56,7 +56,7 @@ const createGroup = async (groupData) => {
  * @returns {Promise<Group|undefined>} 返回指定ID的分组，如果不存在则返回 undefined
  */
 const getGroupById = async (groupId) => {
-  const data = await fileHandler.readData(dataFilePath);
+  const data = await fileHandler.readData(GROUP_DATA_FILE_PATH);
   const groupData = (data.groups || []).find((group) => group.id === groupId);
   return groupData ? new Group(groupData.id, groupData.name, groupData.order, groupData.isCollapsible) : undefined;
 };
@@ -77,7 +77,7 @@ const updateGroup = async (groupId, groupData) => {
 
   try {
     await schema.validateAsync(groupData);
-    const data = await fileHandler.readData(dataFilePath);
+    const data = await fileHandler.readData(GROUP_DATA_FILE_PATH);
     const updatedGroups = (data.groups || []).map(group => {
       if (group.id === groupId) {
         return new Group(group.id, groupData.name, group.order, groupData.isCollapsible);
@@ -85,7 +85,7 @@ const updateGroup = async (groupId, groupData) => {
       return group;
     });
     data.groups = updatedGroups;
-    await fileHandler.writeData(dataFilePath, data);
+    await fileHandler.writeData(GROUP_DATA_FILE_PATH, data);
     logger.info(`Group updated: ${groupId} - ${groupData.name}`);
     return updatedGroups.find(group => group.id === groupId);
   } catch (error) {
@@ -101,11 +101,11 @@ const updateGroup = async (groupId, groupData) => {
  */
 const deleteGroup = async (groupId) => {
   try {
-    const data = await fileHandler.readData(dataFilePath);
+    const data = await fileHandler.readData(GROUP_DATA_FILE_PATH);
     let groups = (data.groups || []).filter((group) => group.id !== groupId);
     groups = groups.map((group, index) => new Group(group.id, group.name, index + 1, group.isCollapsible));
     data.groups = groups;
-    await fileHandler.writeData(dataFilePath, data);
+    await fileHandler.writeData(GROUP_DATA_FILE_PATH, data);
     logger.info(`Group deleted: ${groupId}`);
     return { message: 'Group deleted successfully' };
   } catch (error) {
@@ -127,7 +127,7 @@ const reorderGroups = async (reorderData) => {
 
   try {
     await schema.validateAsync(reorderData);
-    const data = await fileHandler.readData(dataFilePath);
+    const data = await fileHandler.readData(GROUP_DATA_FILE_PATH);
     const groups = data.groups || [];
     const orderedGroups = reorderData.map(item => {
       const groupData = groups.find(group => group.id === item.id);
@@ -135,7 +135,7 @@ const reorderGroups = async (reorderData) => {
 navigationLinks: []
     });
     data.groups = orderedGroups;
-    await fileHandler.writeData(dataFilePath, data);
+    await fileHandler.writeData(GROUP_DATA_FILE_PATH, data);
     logger.info(`Groups reordered`);
     return orderedGroups;
   } catch (error) {

@@ -11,6 +11,12 @@
       "name": "娱乐",
       "order": 2,
       "isCollapsible": false
+    },
+    {
+      "id": "f12a269c-63ed-48e0-9d68-105ea0bd6544",
+      "name": "ѧ1",
+      "order": 4,
+      "isCollapsible": true
     }
   ],
   "websites": [
@@ -37,6 +43,6 @@
       "isAccessible": true
     }
   ],
-  "nextGroupId": 4,
+  "nextGroupId": 5,
   "nextWebsiteId": 7
 }
