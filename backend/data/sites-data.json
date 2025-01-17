@@ -3,12 +3,14 @@
     {
       "id": "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d",
       "name": "工作",
-      "order": 1
+      "order": 1,
+      "isCollapsible": false
     },
     {
       "id": "a1b2c3d4-5e6f-7a8b-9c0d-1e2f3a4b5c6d",
       "name": "娱乐",
-      "order": 2
+      "order": 2,
+      "isCollapsible": false
     }
   ],
   "websites": [
@@ -35,6 +37,6 @@
       "isAccessible": true
     }
   ],
-  "nextGroupId": 3,
+  "nextGroupId": 4,
   "nextWebsiteId": 7
 }

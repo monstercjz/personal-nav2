@@ -13,8 +13,11 @@ const dataFilePath = `${__dirname}/../data/sites-data.json`;
  */
 const getAllGroups = async () => {
   const data = await fileHandler.readData(dataFilePath);
-  return (data.groups || []).map(group => new Group(group.id, group.name, group.order, group.isCollapsible));
+  return (data.groups || [])
+    .filter(group => typeof group.isCollapsible === 'boolean')
+    .map(group => new Group(group.id, group.name, group.order, group.isCollapsible));
 };
+navigationLinks: []
 
 /**
  * @description 创建新的分组
