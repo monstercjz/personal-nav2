@@ -2,27 +2,45 @@
   "groups": [
     {
       "id": "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d",
-      "name": "工作",
+      "name": "22",
       "order": 1,
       "isCollapsible": false
     },
     {
-      "id": "a1b2c3d4-5e6f-7a8b-9c0d-1e2f3a4b5c6d",
-      "name": "娱乐",
+      "id": "f12a269c-63ed-48e0-9d68-105ea0bd6544",
+      "name": "7",
       "order": 2,
       "isCollapsible": false
     },
     {
-      "id": "f12a269c-63ed-48e0-9d68-105ea0bd6544",
-      "name": "ѧ1",
-      "order": 4,
-      "isCollapsible": true
+      "id": "09b87b6d-2869-4bfe-b8c2-3cd37a5ccc20",
+      "name": "3",
+      "order": 3,
+      "isCollapsible": false
     },
     {
-      "id": "09b87b6d-2869-4bfe-b8c2-3cd37a5ccc20",
-      "name": "123",
+      "id": "e3586b27-562a-4a43-abb9-1b153d94d50f",
+      "name": "21",
+      "order": 4,
+      "isCollapsible": false
+    },
+    {
+      "id": "5ba90511-2dff-42fa-844b-ab2f564344e4",
+      "name": "2",
       "order": 5,
-      "isCollapsible": true
+      "isCollapsible": false
+    },
+    {
+      "id": "ff84a17b-3b9d-433a-901f-7405c51fa317",
+      "name": "1",
+      "order": 6,
+      "isCollapsible": false
+    },
+    {
+      "id": "dd850b3e-bb33-43cd-95d9-fd7905d45e77",
+      "name": "41",
+      "order": 7,
+      "isCollapsible": false
     }
   ],
   "websites": [
@@ -49,6 +67,6 @@
       "isAccessible": true
     }
   ],
-  "nextGroupId": 6,
+  "nextGroupId": 25,
   "nextWebsiteId": 7
 }

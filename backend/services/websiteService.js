@@ -22,6 +22,24 @@ const handleServiceError = (error, message) => {
 };
 
 /**
+ * @description 获取所有网站记录
+ * @async
+ * @returns {Promise<Website[]>} - 包含所有网站记录的数组
+ * @throws {Error} - 如果获取网站记录失败
+ */
+const getAllWebsites = async () => {
+  console.log('开始获取所有网站记录');
+  try {
+    const data = await fileHandler.readData(WEBSITE_DATA_FILE_PATH);
+    const websites = (data.websites || []).map(website => new Website(website.id, website.groupId, website.name, website.url, website.description, website.faviconUrl, website.lastAccessTime, website.order, website.isAccessible));
+    logger.info(`获取所有网站，共 ${websites.length} 条`);
+    return websites;
+  } catch (error) {
+    handleServiceError(error, '获取所有网站记录失败');
+  }
+};
+
+/**
  * @description 获取指定分组下的所有网站记录
  * @async
  * @param {string} groupId - 要获取的网站记录所属的分组 ID
@@ -29,6 +47,7 @@ const handleServiceError = (error, message) => {
  * @throws {Error} - 如果 groupId 无效或获取网站记录失败
  */
 const getWebsitesByGroupId = async (groupId) => {
+  console.log('开始获取指定分组下所有网站记录');
 navigationLinks: []
   const schema = Joi.string().uuid().required();
   try {
@@ -60,6 +79,7 @@ navigationLinks: []
  * @throws {Error} - 如果 websiteId 无效
  */
 const getWebsiteById = async (websiteId) => {
+  console.log('开始获取单个网站记录');
   const schema = Joi.string().uuid().required();
   try {
     await schema.validateAsync(websiteId);
@@ -86,6 +106,7 @@ const getWebsiteById = async (websiteId) => {
  * @throws {Error} - 如果 groupId 无效，或者网站数据验证失败，或创建过程中发生任何错误
  */
 const createWebsite = async (groupId, websiteData) => {
+  console.log('开始创建新的网站记录');
   await validateWebsiteData(groupId, websiteData);
 
   const group = await getGroupById(groupId);
@@ -116,6 +137,7 @@ const createWebsite = async (groupId, websiteData) => {
  * @throws {Error} - 如果 websiteId 无效，或者网站数据验证失败，或更新过程中发生任何错误
  */
 const updateWebsite = async (websiteId, websiteData) => {
+  console.log('开始更新网站记录');
   const schema = Joi.object({
     websiteId: Joi.string().uuid().required(),
     websiteData: Joi.object({
@@ -160,8 +182,7 @@ const updateWebsite = async (websiteId, websiteData) => {
  * @throws {Error} - 如果 websiteId 无效或删除过程中发生任何错误
  */
 const deleteWebsite = async (websiteId) => {
-  console.log('deleteWebsite called');
-  console.log('deleteWebsite called');
+  console.log('开始删除某个网站记录');
   const schema = Joi.string().uuid().required();
   try {
     await schema.validateAsync(websiteId);
@@ -189,6 +210,7 @@ const deleteWebsite = async (websiteId) => {
  * @throws {Error} - 如果排序数据无效或排序过程中发生任何错误
  */
 const reorderWebsites = async (reorderData) => {
+  console.log('开始更新网站排序');
   const schema = Joi.array().items(Joi.object({
     id: Joi.string().uuid().required()
   })).required();
@@ -226,6 +248,7 @@ const reorderWebsites = async (reorderData) => {
  * @throws {Error} - 如果提供的网站 ID 列表无效或删除过程中发生任何错误
  */
 const batchDeleteWebsites = async (websiteIds) => {
+  console.log('开始批量删除网站记录');
   console.log('batchDeleteWebsites called');
   console.log('batchDeleteWebsites called');
   const schema = Joi.array().items(Joi.string().uuid().required()).required();
@@ -260,6 +283,7 @@ const batchDeleteWebsites = async (websiteIds) => {
  * @throws {Error} - 如果提供的网站 ID 列表或目标分组 ID 无效，或移动过程中发生任何错误
  */
 const batchMoveWebsites = async (websiteIds, targetGroupId) => {
+  console.log('开始始批量移动网站记录到其他分组');
   const schema = Joi.object({
     websiteIds: Joi.array().items(Joi.string().uuid().required()).required(),
     targetGroupId: Joi.string().uuid().required()
@@ -437,6 +461,8 @@ module.exports = {
   deleteWebsite,
   reorderWebsites,
   batchDeleteWebsites,
-  batchMoveWebsites
+  batchMoveWebsites,
+  getAllWebsites
 };
+
 

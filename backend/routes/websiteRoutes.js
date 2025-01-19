@@ -4,6 +4,11 @@ const router = express.Router();
 const websiteController = require('../controllers/websiteController');
 
 /**
+ * @route GET /websites
+ * @description 获取所有网站记录
+ */
+router.get('/', websiteController.getAllWebsites);
+/**
  * @route DELETE /websites/batch
  * @description 批量删除网站记录
  */
@@ -38,5 +43,7 @@ router.put('/:websiteId', websiteController.updateWebsite);
  * @description 删除网站记录
  */
 router.delete('/:websiteId', websiteController.deleteWebsite);
+
+
 
 module.exports = router;

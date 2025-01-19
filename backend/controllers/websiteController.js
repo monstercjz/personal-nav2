@@ -106,7 +106,18 @@ const batchMoveWebsites = async (req, res) => {
         apiResponse.error(res, error.message);
     }
 };
-
+/**
+ * @description 获取所有网站记录
+ */
+const getAllWebsites = async (req, res) => {
+  console.log('getAllWebsites called');
+  try {
+    const websites = await websiteService.getAllWebsites();
+    apiResponse.success(res, websites);
+  } catch (error) {
+    apiResponse.error(res, error.message);
+  }
+};
 module.exports = {
   getWebsitesByGroupId,
   createWebsite,
@@ -115,5 +126,7 @@ module.exports = {
   deleteWebsite,
   reorderWebsites,
   batchDeleteWebsites,
-  batchMoveWebsites
+  batchMoveWebsites,
+  getAllWebsites
 };
+
