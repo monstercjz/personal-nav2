@@ -93,9 +93,64 @@ const moveToTrash = async (websiteIds) => {
     }
 };
 
+const path = require('path');
+const fs = require('fs').promises;
+
+const BACKUP_DIR = path.join(__dirname, '../data/backups'); // 备份文件存放目录
+const MAX_BACKUP_VERSIONS = 5; // 最大备份版本数
+
+/**
+ * @description 备份 sites-data.json 文件
+ */
+const backupData = async () => {
+  try {
+    const data = await fileHandler.readData(WEBSITE_DATA_FILE_PATH);
+    const timestamp = new Date().toISOString().replace(/:/g, '-'); // 使用 ISO 时间戳，替换冒号
+    const backupFilename = path.join(BACKUP_DIR, `sites-data-backup-${timestamp}.json`);
+
+    // 确保备份目录存在
+    await fs.mkdir(BACKUP_DIR, { recursive: true });
+
+    await fileHandler.writeData(backupFilename, data);
+
+    // 清理旧备份文件，只保留最新 MAX_BACKUP_VERSIONS 个
+    await cleanupOldBackups();
+
+    console.log('sites-data.json backed up successfully');
+  } catch (error) {
+    console.error('Error backing up sites-data.json:', error);
+    throw error;
+  }
+};
+
+/**
+ * @description 清理旧备份文件，只保留最新的 MAX_BACKUP_VERSIONS 个
+ */
+const cleanupOldBackups = async () => {
+  try {
+    const files = await fs.readdir(BACKUP_DIR);
+    const backupFiles = files.filter(file => file.startsWith('sites-data-backup-') && file.endsWith('.json'));
+
+    if (backupFiles.length > MAX_BACKUP_VERSIONS) {
+      backupFiles.sort(); // 默认升序，时间戳越早的文件排在前面
+      const filesToDelete = backupFiles.slice(0, backupFiles.length - MAX_BACKUP_VERSIONS); // 删除较旧的文件
+
+      for (const file of filesToDelete) {
+        const filePath = path.join(BACKUP_DIR, file);
+        await fs.unlink(filePath);
+        console.log(`Deleted old backup file: ${file}`);
+      }
+    }
+  } catch (error) {
+    console.error('Error cleaning up old backups:', error);
+  }
+};
+
+
 module.exports = {
   exportData,
   importData,
   restoreData,
-  moveToTrash
+  moveToTrash,
+  backupData // 导出备份函数
 };

@@ -2,11 +2,12 @@
 const express = require('express');
 const cors = require('cors');
 const app = express();
-
+const path = require('path');
 // Middleware
 app.use(express.json());
 app.use(cors());
-
+// 配置静态文件服务
+app.use('/data/icons', express.static(path.join(__dirname, 'data', 'icons')));
 // Routes
 const groupRoutes = require('./routes/groupRoutes');
 app.use('/groups', groupRoutes);

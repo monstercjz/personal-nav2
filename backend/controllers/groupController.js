@@ -1,7 +1,7 @@
 // backend/controllers/groupController.js
 const groupService = require('../services/groupService');
 const apiResponse = require('../utils/apiResponse');
-
+const syncService = require('../services/syncService');
 /**
  * @description 获取所有分组
  */
@@ -20,6 +20,7 @@ const getAllGroups = async (req, res) => {
 const createGroup = async (req, res) => {
   try {
     const group = await groupService.createGroup(req.body);
+    await syncService.backupData(); // 调用备份函数
     apiResponse.success(res, group, 201);
   } catch (error) {
     apiResponse.error(res, error.message);
@@ -50,6 +51,7 @@ const updateGroup = async (req, res) => {
     if (!group) {
       return apiResponse.error(res, 'Group not found', 404);
     }
+    await syncService.backupData(); // 调用备份函数
     apiResponse.success(res, group);
   } catch (error) {
      apiResponse.error(res, error.message);
@@ -65,6 +67,7 @@ const deleteGroup = async (req, res) => {
     if (!group) {
       return apiResponse.error(res, 'Group not found', 404);
     }
+    await syncService.backupData(); // 调用备份函数
     apiResponse.success(res, { message: 'Group deleted successfully' });
   } catch (error) {
     apiResponse.error(res, error.message);

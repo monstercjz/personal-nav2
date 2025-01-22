@@ -1,6 +1,7 @@
 // backend/controllers/websiteController.js
 const websiteService = require('../services/websiteService');
 const apiResponse = require('../utils/apiResponse');
+const syncService = require('../services/syncService');
 
 /**
  * @description 获取某个分组下的所有网站记录
@@ -20,6 +21,7 @@ const getWebsitesByGroupId = async (req, res) => {
 const createWebsite = async (req, res) => {
   try {
     const website = await websiteService.createWebsite(req.params.groupId, req.body);
+    await syncService.backupData(); // 调用备份函数
     apiResponse.success(res, website, 201);
   } catch (error) {
     apiResponse.error(res, error.message);
@@ -50,6 +52,7 @@ const updateWebsite = async (req, res) => {
     if (!website) {
       return apiResponse.error(res, 'Website not found', 404);
     }
+    await syncService.backupData(); // 调用备份函数
     apiResponse.success(res, website);
   } catch (error) {
     apiResponse.error(res, error.message);
@@ -65,6 +68,7 @@ const deleteWebsite = async (req, res) => {
     if (!website) {
       return apiResponse.error(res, 'Website not found', 404);
     }
+    await syncService.backupData(); // 调用备份函数
     apiResponse.success(res, { message: 'Website deleted successfully' });
   } catch (error) {
     apiResponse.error(res, error.message);
@@ -89,6 +93,7 @@ const reorderWebsites = async (req, res) => {
 const batchDeleteWebsites = async (req, res) => {
     try {
         const result = await websiteService.batchDeleteWebsites(req.body.websiteIds);
+        await syncService.backupData(); // 调用备份函数
         apiResponse.success(res, { message: `${result} websites deleted successfully` });
     } catch (error) {
         apiResponse.error(res, error.message);
@@ -101,6 +106,7 @@ const batchDeleteWebsites = async (req, res) => {
 const batchMoveWebsites = async (req, res) => {
     try {
         const result = await websiteService.batchMoveWebsites(req.body.websiteIds, req.body.targetGroupId);
+        await syncService.backupData(); // 调用备份函数
         apiResponse.success(res, { message: `${result} websites moved successfully` });
     } catch (error) {
         apiResponse.error(res, error.message);

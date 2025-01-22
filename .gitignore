@@ -12,6 +12,8 @@ yarn-error.log*
 /backend/icons/
 /backend/data.json
 /backend/history.json
+/backend/data/icons/
+/backend/data/backups/
 
 # Build directories
 /frontend/build/

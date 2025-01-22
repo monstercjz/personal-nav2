@@ -82,9 +82,9 @@ function renderDashboard({ websites, groups }) {
             websiteItem.setAttribute('data-website-id', website.id);
             websiteItem.setAttribute('data-group-id', website.groupId);
             websiteItem.innerHTML = `
-                ${website.iconPath ? `<img src="${backendUrl}${website.iconPath}" style="width: 16px; height: 16px; margin-right: 5px;">` : ''}
+                ${website.faviconUrl ? `<img src="${backendUrl}${website.faviconUrl}" title="${website.name}" style="width: 16px; height: 16px; margin-right: 5px;">` : ''}
                 <a href="${website.url}" target="_blank">${website.name}</a>
-                <span style="display:none;">${website.iconPath}</span>
+                <span style="display:none;">${website.faviconUrl}</span>
             `;
             websiteList.appendChild(websiteItem);
         });
