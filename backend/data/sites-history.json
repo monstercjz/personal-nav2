@@ -1,3 +1,7 @@
 {
-  "versions": []
+  "websiteInfos": [
+    "Test Website+https://www.test.com+This is a test website",
+    "Test Website+https://www.test.com+This is a test website",
+    "Test Website+https://www.test.com+This is a test website"
+  ]
 }

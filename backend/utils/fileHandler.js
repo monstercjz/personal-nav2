@@ -21,7 +21,26 @@ const writeData = async (filePath, data) => {
   }
 };
 
+
+const checkAndInitDataFiles = async (fileData) => {
+  
+  for (const filePath of Object.keys(fileData)) {
+    try {
+      const data = await fs.readFile(filePath, 'utf-8');
+      if (data.trim() === '') {
+        await fs.writeFile(filePath, JSON.stringify(fileData[filePath], null, 2));
+      }
+    } catch (error) {
+      if (error.code === 'ENOENT') {
+        await fs.writeFile(filePath, JSON.stringify(fileData[filePath], null, 2));
+      } else {
+        throw error;
+      }
+    }
+  }
+};
 module.exports = {
   readData,
   writeData,
+  checkAndInitDataFiles
 };

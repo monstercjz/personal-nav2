@@ -4,6 +4,10 @@ import { fetchAndRenderGroupSelect } from './groupSelectDataService.js';
 import { hideContextMenu } from './contextMenu.js';
 import { backendUrl } from '../config.js';
 import modalInteractionService from './modalInteractionService.js';
+import { WebsiteOperationService } from './websiteOperationService.js';
+import { WebsiteSaveService } from './websiteDataService.js';
+import { confirmWebsiteDelete } from './websiteDeleteService.js';
+import { getGroups, createGroup } from './api.js';
 
 let currentEditWebsiteGroupId = null;
 let currentEditWebsiteId = null;
@@ -24,126 +28,77 @@ export async function fetchIcon(url) {
     }
 }
 
+const websiteOperationService = new WebsiteOperationService();
 // 添加网站
 export async function addWebsite() {
-    const modalId = 'addWebsiteModal';
-    const newWebsiteName = document.getElementById('newWebsiteName').value;
-    let newWebsiteUrl = document.getElementById('newWebsiteUrl').value;
-    const newWebsiteDescription = document.getElementById('newWebsiteDescription').value;
-    const selectedGroupId = document.getElementById('groupSelect').value;
-
-    newWebsiteUrl = validateAndCompleteUrl(newWebsiteUrl);
-    if (!newWebsiteUrl) {
-        return;
-    }
-
-    if (!newWebsiteName || !newWebsiteUrl || !newWebsiteDescription) {
-        showNotification('请输入网站名称、URL和描述', 'error');
-        return;
-    }
-
-    let groupId = selectedGroupId;
-
-    if (!groupId) {
-        // 检查是否存在默认分组
-        try {
-            const response = await fetch(`${backendUrl}/data`);
-            const { groups } = await response.json();
-            let defaultGroup = groups.find(group => group.name === 'Default');
-
-            if (!defaultGroup) {
-                // 创建默认分组
-                const createGroupResponse = await fetch(`${backendUrl}/groups`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name: 'Default' })
-                });
-                if (!createGroupResponse.ok) {
-                    showNotification('创建默认分组失败', 'error');
-                    return;
-                }
-                defaultGroup = await createGroupResponse.json();
-                groupId = defaultGroup.id;
-            } else {
-                groupId = defaultGroup.id;
-            }
-        } catch (error) {
-            console.error('Failed to fetch or create default group:', error);
-            showNotification('创建默认分组失败', 'error');
-            return;
-        }
-    }
-
     try {
-        const addWebsiteResponse = await fetch(`${backendUrl}/websites/groups/${groupId}/websites`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name: newWebsiteName, url: newWebsiteUrl, description: newWebsiteDescription })
+        await websiteOperationService.openWebsiteModal({
+            mode: 'add',
+            callback: async ({ newWebsiteName, newWebsiteUrl, newWebsiteDescription, newWebsiteGroup }) => {
+                const websiteSaveService = new WebsiteSaveService();
+                const result = await websiteSaveService.saveWebsite(null, {
+                    name: newWebsiteName,
+                    url: newWebsiteUrl,
+                    description: newWebsiteDescription
+                }, newWebsiteGroup);
+                if (result) {
+                    renderDashboardWithData();
+                }
+            }
         });
-        if (addWebsiteResponse.ok) {
-            renderDashboardWithData();
-            modalInteractionService.setModalData(modalId, {
-                newWebsiteName: '',
-                newWebsiteUrl: '',
-                newWebsiteDescription: '',
-                groupSelect: ''
-            });
-            modalInteractionService.closeModal(modalId);
-        } else {
-            showNotification('Failed to add website.', 'error');
-        }
     } catch (error) {
         console.error('Failed to add website:', error);
-        showNotification('Failed to add website.', 'error');
+        showNotification('添加网站失败', 'error');
     }
+}
+// 编辑网站
+export async function editWebsite(groupId, websiteId) {
+    console.log('编辑网站', groupId, websiteId);
+    hideContextMenu();
+    currentEditWebsiteGroupId = groupId;
+    currentEditWebsiteId = websiteId;
+    websiteOperationService.openWebsiteModal({
+        mode: 'edit',
+        websiteId: websiteId,
+        groupId: groupId,
+        callback: async ({ newWebsiteName, newWebsiteUrl, newWebsiteDescription, newWebsiteGroup }) => {
+            const websiteSaveService = new WebsiteSaveService();
+            const result = await websiteSaveService.saveWebsite(websiteId, {
+                name: newWebsiteName,
+                url: newWebsiteUrl,
+                description: newWebsiteDescription
+            }, newWebsiteGroup);
+            if (result) {
+                renderDashboardWithData();
+            }
+        }
+    });
 }
 
 // 删除网站
 export async function deleteWebsite(groupId, websiteId) {
-    const deleteOption = await new Promise((resolve) => {
-        const modalId = 'deleteWebsiteModal';
-        const modalContent = `
-            <div class="modal-content">
-                <span class="close close-modal-button">&times;</span>
-                <h2>删除网站</h2>
-                <p>请选择删除选项:</p>
-                <div class="modal-buttons-container">
-                    <button class="save-modal-button" id="permanentDelete">永久删除</button>
-                    <button class="save-modal-button" id="moveToTrash">移动到回收站</button>
-                    <button class="cancel-modal-button">取消</button>
-                </div>
-            </div>
-        `;
-        modalInteractionService.createModal(modalId, modalContent);
-        modalInteractionService.openModal(modalId);
-
-        document.getElementById('permanentDelete').addEventListener('click', () => {
-            resolve('permanent');
-            modalInteractionService.closeModal(modalId);
+    try {
+        // 获取删除选项
+        const deleteOption = await confirmWebsiteDelete({
+            title: '删除网站',
+            message: '请选择删除选项:',
+            options: [
+                { id: 'permanentDelete', label: '永久删除网站' },
+                { id: 'moveToTrash', label: '将网站移动到回收站' }
+            ]
         });
+        console.log('deleteOption:', deleteOption);
+        if (!deleteOption) return;
 
-        document.getElementById('moveToTrash').addEventListener('click', () => {
-            resolve('moveToTrash');
-            modalInteractionService.closeModal(modalId);
-        });
-    });
+        // 执行删除操作
+        const websiteSaveService = new WebsiteSaveService();
+        await websiteSaveService.deleteWebsite(websiteId, deleteOption);
 
-    if (deleteOption) {
-        try {
-            const response = await fetch(`${backendUrl}/websites/${websiteId}`, {
-                method: 'DELETE',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ deleteOption })
-            });
-            if (response.ok) {
-                renderDashboardWithData();
-            } else {
-                showNotification('删除网站失败', 'error');
-            }
-        } catch (error) {
-            console.error('Failed to delete website:', error);
-            showNotification('删除网站失败', 'error');
-        }
+        // 更新UI
+        renderDashboardWithData();
+    } catch (error) {
+        console.error('Failed to delete website:', error);
+        showNotification('删除网站失败', 'error');
     }
 }
 
@@ -174,54 +129,26 @@ export async function saveModalWebsite() {
         return;
     }
 
-    let updateGroupId = groupId;
+    let updateGroupId = modalEditWebsiteGroup;
     if (modalEditWebsiteGroup && parseInt(modalEditWebsiteGroup) !== parseInt(groupId)) {
         updateGroupId = modalEditWebsiteGroup;
     }
-    let response;
-     try {
-        if (parseInt(updateGroupId) !== parseInt(groupId)) {
-            // 先删除旧分组的网站
-            response = await fetch(`${backendUrl}/websites/groups/${groupId}/websites/${websiteId}`, {
-                method: 'DELETE'
-            });
-            if (!response.ok) {
-                showNotification('移动网站失败', 'error');
-                return;
-            }
-            // 再添加新分组的网站
-            response = await fetch(`${backendUrl}/websites/groups/${updateGroupId}/websites`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name: modalEditWebsiteName, url: modalEditWebsiteUrl, description: modalEditWebsiteDescription })
-            });
-        } else {
-             response = await fetch(`${backendUrl}/websites/${websiteId}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name: modalEditWebsiteName, url: modalEditWebsiteUrl, description: modalEditWebsiteDescription })
-            });
-        }
-
-
-        if (response.ok) {
+    try {
+        const websiteSaveService = new WebsiteSaveService();
+        const result = await websiteSaveService.saveWebsite(websiteId, {
+            name: modalEditWebsiteName,
+            url: modalEditWebsiteUrl,
+            description: modalEditWebsiteDescription
+        });
+        if (result) {
             const iconData = await fetchIcon(modalEditWebsiteUrl);
             if (iconData) {
-                let updateResponse;
-                 if (parseInt(updateGroupId) !== parseInt(groupId)) {
-                    const data = await response.json();
-                    updateResponse = await fetch(`${backendUrl}/websites/groups/${updateGroupId}/websites/${data.id}`, {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ name: modalEditWebsiteName, url: modalEditWebsiteUrl, description: modalEditWebsiteDescription, iconPath: iconData.iconPath })
-                    });
-                } else {
-                     updateResponse = await fetch(`${backendUrl}/websites/groups/${updateGroupId}/websites/${websiteId}`, {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ name: modalEditWebsiteName, url: modalEditWebsiteUrl, description: modalEditWebsiteDescription, iconPath: iconData.iconPath })
-                    });
-                }
+                await websiteSaveService.saveWebsite(websiteId, {
+                    name: modalEditWebsiteName,
+                    url: modalEditWebsiteUrl,
+                    description: modalEditWebsiteDescription,
+                    iconPath: iconData.iconPath
+                });
             }
             renderDashboardWithData();
             closeModal(modalId);
@@ -294,6 +221,7 @@ export async function saveImportedWebsites() {
         }
     }
     try {
+        const websiteSaveService = new WebsiteSaveService();
         for (const line of websites) {
             const parts = line.split('+').map(item => item.trim());
             if (parts.length >= 2) {
@@ -301,12 +229,12 @@ export async function saveImportedWebsites() {
                 const url = parts[1];
                 const description = parts[2] || '';
                 const validatedUrl = validateAndCompleteUrl(url);
-                if (validatedUrl) {
-                    await fetch(`${backendUrl}/websites/groups/${groupId}/websites`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ name: name, url: validatedUrl, description: description, groupId: parseInt(groupId) })
-                    });
+                 if (validatedUrl) {
+                    await websiteSaveService.saveWebsite(null, {
+                        name: name,
+                        url: validatedUrl,
+                        description: description
+                    }, groupId);
                 }
             }
         }
@@ -320,18 +248,3 @@ export async function saveImportedWebsites() {
     }
 }
 
-// 编辑网站
-export async function editWebsite(groupId, websiteId) {
-    hideContextMenu();
-    currentEditWebsiteGroupId = groupId;
-    currentEditWebsiteId = websiteId;
-    const modalId = 'addWebsiteModal';
-    const { websiteName, websiteUrl, websiteDescription, websiteGroupId } = getWebsiteInfo(websiteId);
-    modalInteractionService.openModal(modalId);
-    modalInteractionService.setModalData(modalId, {
-        newWebsiteName: websiteName,
-        newWebsiteUrl: websiteUrl,
-        newWebsiteDescription: websiteDescription,
-        groupSelect: websiteGroupId
-    });
-}

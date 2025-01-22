@@ -158,6 +158,15 @@ async function reorderGroups(groups) {
   return fetchDataFromApi('/groups/reorder', 'PATCH', groups);
 }
 
+/**
+ * 移动网站到回收站
+ * @param {string|string[]} websiteIds - 网站 ID 或网站 ID 数组
+ * @returns {Promise<any>} - 返回 Promise，解析为移动结果
+ */
+async function moveToTrash(websiteIds) {
+  return fetchDataFromApi('/sync/moveToTrash', 'POST', { websiteIds });
+}
+
 export {
   fetchDataFromApi,
   getWebsites,
@@ -174,4 +183,5 @@ export {
   batchDeleteWebsites,
   batchMoveWebsites,
   reorderGroups,
+  moveToTrash
 };

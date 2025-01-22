@@ -18,5 +18,11 @@ router.post('/import', syncController.importData);
  * @description 恢复到指定版本
  */
 router.post('/history/restore', syncController.restoreData);
+/**
+ * @route POST /moveToTrash
+ * @description 记录网站信息
+ * @body {websiteIds: string[]}
+ */
+router.post('/moveToTrash', syncController.moveToTrash);
 
 module.exports = router;

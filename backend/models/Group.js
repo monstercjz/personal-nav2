@@ -21,6 +21,8 @@ class Group {
         if (typeof order !== 'number') {
             throw new Error('order 必须是数字');
         }
+            // 提供默认值
+        //isCollapsible = isCollapsible ?? false;
         if (typeof isCollapsible !== 'boolean') {
             throw new Error('isCollapsible 必须是布尔值');
         }
@@ -28,6 +30,7 @@ class Group {
         this.name = name;
         this.order = order;
         this.isCollapsible = isCollapsible ?? false;
+        //this.isCollapsible = isCollapsible;
     }
 
 }

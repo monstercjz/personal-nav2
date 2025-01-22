@@ -1,4 +1,4 @@
-import { openEditGroupModal, deleteGroup } from './groupInteractionService.js';
+import { editGroup, deleteGroup } from './groupInteractionService.js';
 import { editWebsite, deleteWebsite } from './websiteInteractionService.js';
 // 隐藏右键菜单
 function hideContextMenu() {
@@ -45,7 +45,7 @@ function showGroupContextMenu(e, groupId) {
     ];
     const menu = createContextMenu(e, menuItems);
     menu.querySelector('.edit-group-item').addEventListener('click', () => {
-        openEditGroupModal(groupId);
+        editGroup(groupId);
     });
     menu.querySelector('.delete-group-item').addEventListener('click', () => {
         deleteGroup(groupId);
@@ -59,7 +59,8 @@ function showWebsiteContextMenu(e, groupId, websiteId) {
     ];
     const menu = createContextMenu(e, menuItems);
      menu.querySelector('.edit-website-item').addEventListener('click', () => {
-        editWebsite(groupId, websiteId, 'addWebsiteModal');
+        console.log('编辑网站', websiteId);
+        editWebsite(groupId, websiteId);
     });
     menu.querySelector('.delete-website-item').addEventListener('click', () => {
         deleteWebsite(groupId, websiteId);
@@ -87,6 +88,7 @@ dashboard.addEventListener('contextmenu', function (e) {
         const groupDiv = websiteItem.closest('.group');
         const groupId = getGroupId(groupDiv);
         const websiteId = websiteItem.getAttribute('data-website-id');
+        console.log('右键监听到的groupId:', groupId, '网站ID:', websiteId);
         if (groupId && websiteId) {
             showWebsiteContextMenu(e, groupId, websiteId);
         }

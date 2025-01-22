@@ -2,43 +2,43 @@
   "groups": [
     {
       "id": "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d",
-      "name": "22",
+      "name": "1",
       "order": 1,
       "isCollapsible": false
     },
     {
-      "id": "f12a269c-63ed-48e0-9d68-105ea0bd6544",
-      "name": "7",
+      "id": "1fd77e26-625e-419e-9940-85b59a14fcea",
+      "name": "2",
       "order": 2,
       "isCollapsible": false
     },
     {
-      "id": "09b87b6d-2869-4bfe-b8c2-3cd37a5ccc20",
-      "name": "3",
+      "id": "f7f250c9-e715-4213-ac77-a1eedf285f63",
+      "name": "4",
       "order": 3,
       "isCollapsible": false
     },
     {
-      "id": "e3586b27-562a-4a43-abb9-1b153d94d50f",
-      "name": "21",
+      "id": "ffd0ede2-b7b7-4c77-ad80-47af0dda4429",
+      "name": "Default",
       "order": 4,
       "isCollapsible": false
     },
     {
-      "id": "5ba90511-2dff-42fa-844b-ab2f564344e4",
-      "name": "2",
+      "id": "8b10b70a-22d0-4086-a54a-29429f4af102",
+      "name": "Default",
       "order": 5,
       "isCollapsible": false
     },
     {
-      "id": "ff84a17b-3b9d-433a-901f-7405c51fa317",
-      "name": "1",
+      "id": "d1cadf8f-3fc3-4047-8651-6dd718b6eb1f",
+      "name": "Default",
       "order": 6,
       "isCollapsible": false
     },
     {
-      "id": "dd850b3e-bb33-43cd-95d9-fd7905d45e77",
-      "name": "41",
+      "id": "d5c39593-c000-49b0-93f2-65248d2813c7",
+      "name": "1",
       "order": 7,
       "isCollapsible": false
     }
@@ -65,8 +65,124 @@
       "lastAccessTime": "2025-01-17T00:52:55.388Z",
       "order": 4,
       "isAccessible": true
+    },
+    {
+      "id": "e5852879-959a-454f-877c-bb1a5f4b1208",
+      "groupId": "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d",
+      "name": "baidu",
+      "url": "http://baidu.com",
+      "description": "1",
+      "lastAccessTime": "2025-01-21T06:51:05.629Z",
+      "order": 3,
+      "isAccessible": true
+    },
+    {
+      "id": "47fb73ce-9f2a-4c96-80e2-12ee9cfcffd6",
+      "groupId": "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d",
+      "name": "zhihu",
+      "url": "http://zhihu.com",
+      "description": "2",
+      "faviconUrl": "https://www.google.com/s2/favicons?sz=64&domain_url=http%3A%2F%2Fzhihu.com",
+      "lastAccessTime": "2025-01-21T06:52:02.039Z",
+      "order": 4,
+      "isAccessible": true
+    },
+    {
+      "id": "048cf375-f1d0-4ada-abc9-fe7640107d6f",
+      "groupId": "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d",
+      "name": "douyin",
+      "url": "http://douyin.com",
+      "description": "1",
+      "faviconUrl": "https://www.google.com/s2/favicons?sz=64&domain_url=http%3A%2F%2Fdouyin.com",
+      "lastAccessTime": "2025-01-21T07:04:04.314Z",
+      "order": 5,
+      "isAccessible": true
+    },
+    {
+      "id": "12a71234-8ec5-4921-be73-2fbe183b9366",
+      "groupId": "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d",
+      "name": "zhihu",
+      "url": "http://zhihu.com/v2",
+      "description": "1",
+      "lastAccessTime": "2025-01-21T07:27:04.749Z",
+      "order": 6,
+      "isAccessible": true
+    },
+    {
+      "id": "8c28763a-af3f-4c43-8708-8272221b6108",
+      "groupId": "ffd0ede2-b7b7-4c77-ad80-47af0dda4429",
+      "name": "5",
+      "url": "http://zhihu.com/v3",
+      "description": "1",
+      "lastAccessTime": "2025-01-21T08:12:42.532Z",
+      "order": 1,
+      "isAccessible": true
+    },
+    {
+      "id": "cf9c2d60-6eb8-4926-94d4-329538e44d48",
+      "groupId": "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d",
+      "name": "1",
+      "url": "http://zhihu.com/v23",
+      "description": "1",
+      "faviconUrl": "https://www.google.com/s2/favicons?sz=64&domain_url=http%3A%2F%2Fzhihu.com%2Fv23",
+      "lastAccessTime": "2025-01-21T08:52:28.758Z",
+      "order": 7,
+      "isAccessible": true
+    },
+    {
+      "id": "7675c4c7-ae11-4b9c-9f70-cd21b703e5be",
+      "groupId": "8b10b70a-22d0-4086-a54a-29429f4af102",
+      "name": "1",
+      "url": "http://baidu.com/as",
+      "description": "1",
+      "faviconUrl": "https://www.google.com/s2/favicons?sz=64&domain_url=http%3A%2F%2Fbaidu.com%2Fas",
+      "lastAccessTime": "2025-01-21T08:56:50.881Z",
+      "order": 1,
+      "isAccessible": true
+    },
+    {
+      "id": "8cac4e20-3a4d-4b09-830b-612dcab2aac0",
+      "groupId": "d1cadf8f-3fc3-4047-8651-6dd718b6eb1f",
+      "name": "1",
+      "url": "http://baidu.com/b",
+      "description": "1",
+      "faviconUrl": "https://www.google.com/s2/favicons?sz=64&domain_url=http%3A%2F%2Fbaidu.com%2Fb",
+      "lastAccessTime": "2025-01-21T08:58:52.217Z",
+      "order": 1,
+      "isAccessible": true
+    },
+    {
+      "id": "c1442d53-3545-4d2c-82ab-32d0ac536598",
+      "groupId": "ffd0ede2-b7b7-4c77-ad80-47af0dda4429",
+      "name": "122",
+      "url": "http://baidu.com/va",
+      "description": "1",
+      "lastAccessTime": "2025-01-21T09:00:39.135Z",
+      "order": 2,
+      "isAccessible": true
+    },
+    {
+      "id": "55aa859f-1db7-4e44-8bb2-68ec4dd29b4a",
+      "groupId": "1fd77e26-625e-419e-9940-85b59a14fcea",
+      "name": "123",
+      "url": "http://baidu.com/v222",
+      "description": "1",
+      "lastAccessTime": "2025-01-21T09:08:16.809Z",
+      "order": 1,
+      "isAccessible": true
+    },
+    {
+      "id": "953b5076-bbf5-4e02-b0cf-d768e1ab6d2d",
+      "groupId": "ffd0ede2-b7b7-4c77-ad80-47af0dda4429",
+      "name": "12",
+      "url": "http://group.com/v",
+      "description": "1",
+      "faviconUrl": "https://www.google.com/s2/favicons?sz=64&domain_url=http%3A%2F%2Fgroup.com%2Fv",
+      "lastAccessTime": "2025-01-21T19:22:35.141Z",
+      "order": 3,
+      "isAccessible": true
     }
   ],
-  "nextGroupId": 25,
+  "nextGroupId": 41,
   "nextWebsiteId": 7
 }

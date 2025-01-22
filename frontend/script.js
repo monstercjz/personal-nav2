@@ -3,7 +3,7 @@
 import { showNotification, renderDashboardWithData } from './modules/dashboardDataService.js';
 import { fetchAndRenderGroupSelect, renderGroupSelect } from './modules/groupSelectDataService.js';
 import { applySavedTheme, toggleTheme } from './modules/themeService.js';
-import { addGroup, deleteGroup, saveModalGroup, openEditGroupModal } from './modules/groupInteractionService.js';
+import { addGroup, deleteGroup, editGroup } from './modules/groupInteractionService.js';
 import { addWebsite, deleteWebsite, saveModalWebsite, getWebsiteInfo, fetchIcon, openImportWebsitesModal, saveImportedWebsites } from './modules/websiteInteractionService.js';
 import { hideContextMenu, createContextMenu, showGroupContextMenu, showWebsiteContextMenu } from './modules/contextMenu.js';
 import { validateAndCompleteUrl, showTooltip, hideTooltip } from './modules/utils.js';
@@ -47,13 +47,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     /**
      * 监听分组选择下拉框点击事件，如果 groupsData 为空则获取并渲染分组下拉框
      */
-    if (groupSelect) {
+/*     if (groupSelect) {
         groupSelect.addEventListener('click', () => {
             if (!groupsData) {
                 fetchAndRenderGroupSelect();
             }
         });
-    }
+    } */
 
     /**
      * 处理仪表盘点击事件，打开网站链接
@@ -110,6 +110,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const showAddGroupButton = document.getElementById('showAddGroup');
     showAddGroupButton.addEventListener('click', () => {
-        openEditGroupModal(null);
+        addGroup();
+    });
+
+    const showAddWebsiteButton = document.getElementById('showAddWebsite');
+    showAddWebsiteButton.addEventListener('click', () => {
+        addWebsite();
     });
 });

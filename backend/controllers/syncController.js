@@ -38,8 +38,21 @@ const restoreData = async (req, res) => {
     }
 };
 
+/**
+ * @description 移动网站到回收站
+ */
+const moveToTrash = async (req, res) => {
+    try {
+        const result = await syncService.moveToTrash(req.body.websiteIds);
+        apiResponse.success(res, result);
+    } catch (error) {
+        apiResponse.error(res, error.message);
+    }
+};
+
 module.exports = {
   exportData,
   importData,
-  restoreData
+  restoreData,
+  moveToTrash
 };

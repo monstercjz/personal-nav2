@@ -19,8 +19,9 @@ const getHelp = async () => {
             { method: 'PUT', path: '/groups/:groupId', description: 'Update a group' },
             { method: 'DELETE', path: '/groups/:groupId', description: 'Delete a group' },
             { method: 'PATCH', path: '/groups/reorder', description: 'Reorder groups' },
-            { method: 'GET', path: '/groups/:groupId/websites', description: 'Get all websites in a group' },
-            { method: 'POST', path: '/groups/:groupId/websites', description: 'Create a new website in a group' },
+            { method: 'GET', path: '/websites', description: 'Get all websites' },
+            { method: 'GET', path: '/websites/groups/:groupId/websites', description: 'Get all websites in a group' },
+            { method: 'POST', path: '/websites/groups/:groupId/websites', description: 'Create a new website in a group' },
             { method: 'GET', path: '/websites/:websiteId', description: 'Get a website by ID' },
             { method: 'PUT', path: '/websites/:websiteId', description: 'Update a website' },
             { method: 'DELETE', path: '/websites/:websiteId', description: 'Delete a website' },
@@ -28,9 +29,9 @@ const getHelp = async () => {
             { method: 'DELETE', path: '/websites/batch', description: 'Batch delete websites' },
             { method: 'PATCH', path: '/websites/batch-move', description: 'Batch move websites to another group' },
             { method: 'GET', path: '/search?keyword=xxx', description: 'Search groups and websites' },
-            { method: 'GET', path: '/export', description: 'Export all data' },
-            { method: 'POST', path: '/import', description: 'Import data' },
-            { method: 'POST', path: '/history/restore', description: 'Restore data to a specific version' },
+            { method: 'GET', path: '/sync/export', description: 'Export all data' },
+            { method: 'POST', path: '/sync/import', description: 'Import data' },
+            { method: 'POST', path: '/sync/history/restore', description: 'Restore data to a specific version' },
             { method: 'GET', path: '/settings', description: 'Get user settings' },
             { method: 'PUT', path: '/settings', description: 'Update user settings' },
             { method: 'POST', path: '/settings/icon', description: 'Upload a custom icon' },
@@ -39,6 +40,7 @@ const getHelp = async () => {
             { method: 'POST', path: '/extension/sync', description: 'Sync browser bookmarks' },
             { method: 'GET', path: '/status', description: 'Get server status' },
             { method: 'GET', path: '/help', description: 'Get API documentation' },
+            { method: 'POST', path: '/sync/moveToTrash', description: 'Move website to trash' },
         ]
     };
 };
