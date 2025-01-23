@@ -648,6 +648,8 @@ h1 {
 
 .add-buttons button svg {
     transition: transform 0.2s ease;
+    width: 30px;
+    height: 30px;
 }
 
 .add-buttons button:hover svg {
@@ -872,4 +874,69 @@ body[data-theme='dark'] {
 .notification.warning {
     background: var(--warning-color);
     color: white;
+}
+.search-container {
+    position: fixed; /* 固定定位 */
+    top: 20px; /* 距离顶部20px */
+    right: 20px; /* 距离右侧20px */
+    width: 40px; /* 初始宽度为图标宽度 */
+    transition: width 0.3s ease;
+    z-index: 1000; /* 确保在最上层 */
+    display: flex;
+    align-items: center;
+}
+
+.search-container.expanded {
+    width: 300px; /* 展开后的宽度 */
+}
+.search-container input:focus {
+    outline: none;
+    border-color: var(--background);
+    box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+}
+.search-icon {
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.search-input {
+    display: none;
+    width: 256px; /* 搜索框宽度 */
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 4px 8px;
+    margin-left: 8px;
+    background-color: #f9f9f9;
+    font-size: 16px;
+    transition: all 0.3s ease;
+    border-color: transparent; /* 初始边框颜色为透明 */
+}
+
+
+
+.search-container.expanded .search-input {
+    display: block;
+}
+
+.search-results .search-result-item {
+    padding: 8px;
+    cursor: pointer;
+}
+
+.search-results .search-result-item:hover {
+    background-color: #f0f0f0;
+}
+
+.search-results .no-results {
+    padding: 8px;
+    text-align: center;
+    color: #888;
+}
+
+.highlight {
+    background-color: #ff0;
 }

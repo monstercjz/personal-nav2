@@ -1,6 +1,8 @@
 'use strict';
 
 import { showNotification, renderDashboardWithData } from './modules/dashboardDataService.js';
+//import { WebsiteDataService } from './modules/websiteDataService.js';
+import { SearchService } from './modules/searchService.js';
 import { fetchAndRenderGroupSelect, renderGroupSelect } from './modules/groupSelectDataService.js';
 import { applySavedTheme, toggleTheme } from './modules/themeService.js';
 import { addGroup, deleteGroup, editGroup } from './modules/groupInteractionService.js';
@@ -37,6 +39,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // 渲染仪表盘数据
     renderDashboardWithData();
+
+    // 初始化搜索功能
+    const searchService = new SearchService();
 
     // 添加主题切换按钮点击事件监听器
     toggleThemeButton.addEventListener('click', toggleTheme);
