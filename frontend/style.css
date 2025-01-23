@@ -875,6 +875,48 @@ body[data-theme='dark'] {
     background: var(--warning-color);
     color: white;
 }
+
+/* Website tooltip styles */
+.website-tooltip {
+  background: var(--glass-effect);
+  border: var(--glass-border);
+  border-radius: var(--radius);
+  padding: 1rem;
+  box-shadow: var(--glass-shadow);
+  backdrop-filter: var(--glass-blur);
+  z-index: 1000;
+  min-width: 240px;
+  animation: fadeIn 0.2s ease-out;
+  opacity: 0;
+  transition: opacity 0.15s ease-in-out;
+}
+
+.fade-in {
+  opacity: 1;
+}
+
+.fade-out {
+  opacity: 0;
+}
+
+.tooltip-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.tooltip-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+}
+
+.tooltip-row strong {
+  color: var(--primary-color);
+  min-width: 60px;
+}
 .search-container {
     position: fixed; /* 固定定位 */
     top: 20px; /* 距离顶部20px */

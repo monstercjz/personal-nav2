@@ -3,19 +3,21 @@ import { WebsiteSaveService } from './websiteDataService.js';
 import { hideContextMenu } from './contextMenu.js';
 import { backendUrl } from '../config.js';
 import { WebsiteOperationService } from './websiteOperationService.js';
+import { WebsiteTooltipService } from './websiteTooltipService.js';
 import { confirmWebsiteDelete } from './websiteDeleteService.js';
 import websiteImportModalHandler from './websiteImportModalHandler.js';
 
+
 let currentEditWebsiteGroupId = null;
 let currentEditWebsiteId = null;
+const websiteOperationService = new WebsiteOperationService();
+const websiteTooltipService = new WebsiteTooltipService();
 
 // 获取图标函数
 export async function fetchIcon(url) {
     try {
-        console.log('url2', url);
         const iconResponse = await fetch(`${backendUrl}/favicon?url=${url}`);
         if (iconResponse.ok) {
-            console.log('iconResponse', iconResponse);
             return await iconResponse.json();
         }
         return null;
@@ -25,7 +27,6 @@ export async function fetchIcon(url) {
     }
 }
 
-const websiteOperationService = new WebsiteOperationService();
 // 添加网站
 export async function addWebsite() {
     try {
@@ -51,7 +52,6 @@ export async function addWebsite() {
 
 // 编辑网站
 export async function editWebsite(groupId, websiteId) {
-    console.log('编辑网站', groupId, websiteId);
     hideContextMenu();
     currentEditWebsiteGroupId = groupId;
     currentEditWebsiteId = websiteId;
@@ -76,7 +76,6 @@ export async function editWebsite(groupId, websiteId) {
 // 删除网站
 export async function deleteWebsite(groupId, websiteId) {
     try {
-        // 获取删除选项
         const deleteOption = await confirmWebsiteDelete({
             title: '删除网站',
             message: '请选择删除选项:',
@@ -85,14 +84,10 @@ export async function deleteWebsite(groupId, websiteId) {
                 { id: 'moveToTrash', label: '将网站移动到回收站' }
             ]
         });
-        console.log('deleteOption:', deleteOption);
         if (!deleteOption) return;
 
-        // 执行删除操作
         const websiteSaveService = new WebsiteSaveService();
         await websiteSaveService.deleteWebsite(websiteId, deleteOption);
-
-        // 更新UI
         renderDashboardWithData();
     } catch (error) {
         console.error('Failed to delete website:', error);
@@ -134,20 +129,18 @@ export async function openImportWebsitesModal() {
   }
 }
 
-/**
- * 处理网站点击事件
- * @param {HTMLElement} target - 点击的网站元素
- * @returns {Promise} - 返回API调用结果
- */
+// 处理网站悬停事件
+export async function handleWebsiteHover(target) {
+    await websiteTooltipService.handleWebsiteHover(target);
+}
+
 export function handleWebsiteClick(target) {
     if (!target) {
-        console.error('Target element is required');
         return Promise.reject(new Error('Target element is required'));
     }
 
     const websiteId = target.dataset.websiteId;
     if (!websiteId) {
-        console.error('websiteId is required');
         return Promise.reject(new Error('websiteId is required'));
     }
 
@@ -158,5 +151,3 @@ export function handleWebsiteClick(target) {
             throw error;
         });
 }
-
-//export { addWebsite, deleteWebsite, getWebsiteInfo, fetchIcon, openImportWebsitesModal, handleWebsiteClick };

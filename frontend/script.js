@@ -6,7 +6,7 @@ import { SearchService } from './modules/searchService.js';
 import { fetchAndRenderGroupSelect, renderGroupSelect } from './modules/groupSelectDataService.js';
 import { applySavedTheme, toggleTheme } from './modules/themeService.js';
 import { addGroup, deleteGroup, editGroup } from './modules/groupInteractionService.js';
-import { addWebsite, deleteWebsite, getWebsiteInfo, fetchIcon, openImportWebsitesModal ,handleWebsiteClick } from './modules/websiteInteractionService.js';
+import { addWebsite, deleteWebsite, getWebsiteInfo, handleWebsiteHover, openImportWebsitesModal ,handleWebsiteClick } from './modules/websiteInteractionService.js';
 import { hideContextMenu, createContextMenu, showGroupContextMenu, showWebsiteContextMenu } from './modules/contextMenu.js';
 import { validateAndCompleteUrl, showTooltip, hideTooltip } from './modules/utils.js';
 import modalInteractionService from './modules/modalInteractionService.js';
@@ -75,8 +75,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         openImportWebsitesModal();
     });
 
-    // 添加鼠标悬停事件监听器，显示工具提示
-    document.addEventListener('mouseover', showTooltip);
+    // 添加鼠标悬停事件监听器
+    dashboard.addEventListener('mouseover', (e) => {
+        const target = e.target.closest('.website-item');
+        if (target) {
+            // 显示网站详细信息tooltip
+            handleWebsiteHover(target);
+        }
+    });
 
     // 添加鼠标移开事件监听器，隐藏工具提示
     document.addEventListener('mouseout', hideTooltip);
@@ -85,11 +91,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     toggleAddButtons.addEventListener('click', () => {
         addButtons.style.display = addButtons.style.display === 'none' ? 'flex' : 'none';
     });
+
     // 添加添加分组按钮点击事件监听器
     const showAddGroupButton = document.getElementById('showAddGroup');
     showAddGroupButton.addEventListener('click', () => {
         addGroup();
     });
+
     // 添加添加网站按钮点击事件监听器
     const showAddWebsiteButton = document.getElementById('showAddWebsite');
     showAddWebsiteButton.addEventListener('click', () => {
