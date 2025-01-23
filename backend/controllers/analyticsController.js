@@ -14,6 +14,25 @@ const getAnalytics = async (req, res) => {
   }
 };
 
+/**
+ * @description 记录网站点击时间
+ */
+const recordClick = async (req, res) => {
+  try {
+    const { websiteId } = req.body;
+    
+    if (!websiteId) {
+      return apiResponse.error(res, 'websiteId is required', 400);
+    }
+
+    await analyticsService.updateLastClickTime(websiteId);
+    apiResponse.success(res, { success: true });
+  } catch (error) {
+    apiResponse.error(res, error.message);
+  }
+};
+
 module.exports = {
   getAnalytics,
+  recordClick
 };

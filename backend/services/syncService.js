@@ -108,7 +108,10 @@ const MAX_BACKUP_VERSIONS = 5; // 最大备份版本数
 const backupData = async () => {
   try {
     const data = await fileHandler.readData(WEBSITE_DATA_FILE_PATH);
-    const timestamp = new Date().toISOString().replace(/:/g, '-'); // 使用 ISO 时间戳，替换冒号
+    // Get current time in China timezone (UTC+8)
+    const now = new Date();
+    const chinaTime = new Date(now.getTime() + (8 * 60 * 60 * 1000));
+    const timestamp = chinaTime.toISOString().replace(/:/g, '-').replace('T', '_');
     const backupFilename = path.join(BACKUP_DIR, `sites-data-backup-${timestamp}.json`);
 
     // 确保备份目录存在
@@ -132,25 +135,28 @@ const backupData = async () => {
 const cleanupOldBackups = async () => {
   try {
     const files = await fs.readdir(BACKUP_DIR);
-    const backupFiles = files
-      .filter(file => file.startsWith('sites-data-backup-') && file.endsWith('.json'))
-      .map(file => {
-        const filePath = path.join(BACKUP_DIR, file);
-        return { 
-          name: file,
-          path: filePath,
-          time: fs.statSync(filePath).mtime.getTime()
-        };
-      });
+    const backupFilesWithStats = await Promise.all(
+      files
+        .filter(file => file.startsWith('sites-data-backup-') && file.endsWith('.json'))
+        .map(async file => {
+          const filePath = path.join(BACKUP_DIR, file);
+          const stats = await fs.stat(filePath);
+          return { 
+            name: file,
+            path: filePath,
+            time: stats.mtime.getTime()
+          };
+        })
+    );
 
     const now = Date.now();
     const FIVE_MINUTES = 5 * 60 * 1000;
     
     // Keep all backups from last 5 minutes
-    const recentBackups = backupFiles.filter(f => now - f.time < FIVE_MINUTES);
+    const recentBackups = backupFilesWithStats.filter(f => now - f.time < FIVE_MINUTES);
     
     // For older backups, keep only latest 5
-    const oldBackups = backupFiles
+    const oldBackups = backupFilesWithStats
       .filter(f => now - f.time >= FIVE_MINUTES)
       .sort((a, b) => b.time - a.time) // Sort newest first
       .slice(MAX_BACKUP_VERSIONS); // Keep only latest 5

@@ -4,7 +4,7 @@ import { showNotification, renderDashboardWithData } from './modules/dashboardDa
 import { fetchAndRenderGroupSelect, renderGroupSelect } from './modules/groupSelectDataService.js';
 import { applySavedTheme, toggleTheme } from './modules/themeService.js';
 import { addGroup, deleteGroup, editGroup } from './modules/groupInteractionService.js';
-import { addWebsite, deleteWebsite, saveModalWebsite, getWebsiteInfo, fetchIcon, openImportWebsitesModal } from './modules/websiteInteractionService.js';
+import { addWebsite, deleteWebsite, getWebsiteInfo, fetchIcon, openImportWebsitesModal } from './modules/websiteInteractionService.js';
 import { hideContextMenu, createContextMenu, showGroupContextMenu, showWebsiteContextMenu } from './modules/contextMenu.js';
 import { validateAndCompleteUrl, showTooltip, hideTooltip } from './modules/utils.js';
 import modalInteractionService from './modules/modalInteractionService.js';
