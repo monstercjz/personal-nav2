@@ -1,50 +1,35 @@
 // backend/services/analyticsService.js
 const fileHandler = require('../utils/fileHandler');
-const path = require('path');
-
-const dataFilePath = path.join(__dirname, '../data/analytics.json');
+const { WEBSITE_DATA_FILE_PATH } = require('../config/constants');
 
 /**
- * @description 获取网站记录的访问统计信息
- */
-const getAnalytics = async () => {
-  try {
-    const data = await fileHandler.readData(dataFilePath);
-    return data || { websiteClicks: {} };
-  } catch (error) {
-    return { websiteClicks: {} };
-  }
-};
-
-/**
- * @description 更新网站的最后点击时间
+ * @description 更新网站的最后访问时间
  * @param {string} websiteId - 网站ID
  */
 const updateLastClickTime = async (websiteId) => {
   try {
-    const data = await getAnalytics();
+    // 读取网站数据
+    const data = await fileHandler.readData(WEBSITE_DATA_FILE_PATH);
     
-    // 初始化网站点击数据
-    if (!data.websiteClicks) {
-      data.websiteClicks = {};
+    // 查找并更新对应网站的最后访问时间
+    const website = data.websites.find(w => w.id === websiteId);
+    if (website) {
+      // 获取北京时间（UTC+8）
+      const now = new Date();
+      const beijingTime = new Date(now.getTime() + 8 * 60 * 60 * 1000);
+      website.lastAccessTime = beijingTime.toISOString();
+      
+      await fileHandler.writeData(WEBSITE_DATA_FILE_PATH, data);
+      return true;
     }
     
-    // 更新最后点击时间
-    data.websiteClicks[websiteId] = {
-      lastClick: new Date().toISOString()
-    };
-
-    // 保存更新后的数据
-    await fileHandler.writeData(dataFilePath, data);
-    
-    return true;
+    return false;
   } catch (error) {
-    console.error('Error updating website click time:', error);
+    console.error('Error updating website last access time:', error);
     throw error;
   }
 };
 
 module.exports = {
-  getAnalytics,
   updateLastClickTime
 };

@@ -1,14 +1,10 @@
 import { renderDashboardWithData, showNotification } from './dashboardDataService.js';
-import { validateAndCompleteUrl } from './utils.js';
-import { fetchAndRenderGroupSelect } from './groupSelectDataService.js';
+import { WebsiteSaveService } from './websiteDataService.js';
 import { hideContextMenu } from './contextMenu.js';
 import { backendUrl } from '../config.js';
-import modalInteractionService from './modalInteractionService.js';
 import { WebsiteOperationService } from './websiteOperationService.js';
-import { WebsiteSaveService } from './websiteDataService.js';
 import { confirmWebsiteDelete } from './websiteDeleteService.js';
-import { getGroups, createGroup } from './api.js';
-//import { ImportWebsiteService } from './importWebsiteService.js';
+import websiteImportModalHandler from './websiteImportModalHandler.js';
 
 let currentEditWebsiteGroupId = null;
 let currentEditWebsiteId = null;
@@ -52,6 +48,7 @@ export async function addWebsite() {
         showNotification('添加网站失败', 'error');
     }
 }
+
 // 编辑网站
 export async function editWebsite(groupId, websiteId) {
     console.log('编辑网站', groupId, websiteId);
@@ -113,10 +110,6 @@ export function getWebsiteInfo(websiteId) {
     return { websiteName, websiteUrl, websiteDescription, websiteGroupId };
 }
 
-
-
-import websiteImportModalHandler from './websiteImportModalHandler.js';
-
 export async function openImportWebsitesModal() {
   try {
     await websiteImportModalHandler.showImportModal(
@@ -140,3 +133,30 @@ export async function openImportWebsitesModal() {
     showNotification('打开导入界面失败', 'error');
   }
 }
+
+/**
+ * 处理网站点击事件
+ * @param {HTMLElement} target - 点击的网站元素
+ * @returns {Promise} - 返回API调用结果
+ */
+export function handleWebsiteClick(target) {
+    if (!target) {
+        console.error('Target element is required');
+        return Promise.reject(new Error('Target element is required'));
+    }
+
+    const websiteId = target.dataset.websiteId;
+    if (!websiteId) {
+        console.error('websiteId is required');
+        return Promise.reject(new Error('websiteId is required'));
+    }
+
+    const websiteSaveService = new WebsiteSaveService();
+    return websiteSaveService.recordWebsiteClick(websiteId)
+        .catch(error => {
+            console.error('Failed to record click time:', error);
+            throw error;
+        });
+}
+
+//export { addWebsite, deleteWebsite, getWebsiteInfo, fetchIcon, openImportWebsitesModal, handleWebsiteClick };

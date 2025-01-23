@@ -6,7 +6,7 @@ import { SearchService } from './modules/searchService.js';
 import { fetchAndRenderGroupSelect, renderGroupSelect } from './modules/groupSelectDataService.js';
 import { applySavedTheme, toggleTheme } from './modules/themeService.js';
 import { addGroup, deleteGroup, editGroup } from './modules/groupInteractionService.js';
-import { addWebsite, deleteWebsite, getWebsiteInfo, fetchIcon, openImportWebsitesModal } from './modules/websiteInteractionService.js';
+import { addWebsite, deleteWebsite, getWebsiteInfo, fetchIcon, openImportWebsitesModal ,handleWebsiteClick } from './modules/websiteInteractionService.js';
 import { hideContextMenu, createContextMenu, showGroupContextMenu, showWebsiteContextMenu } from './modules/contextMenu.js';
 import { validateAndCompleteUrl, showTooltip, hideTooltip } from './modules/utils.js';
 import modalInteractionService from './modules/modalInteractionService.js';
@@ -51,11 +51,14 @@ document.addEventListener('DOMContentLoaded', async () => {
      * 使用事件委托，监听仪表盘容器的点击事件
      * @param {Event} e - 点击事件对象
      */
-    dashboard.addEventListener('click', (e) => {
+    dashboard.addEventListener('click', async (e) => {
         const target = e.target.closest('.website-item');
         if (target) {
             const link = target.querySelector('a');
             if (link) {
+                // 记录点击时间
+                await handleWebsiteClick(target);
+                // 打开链接
                 window.open(link.href, '_blank');
             }
         }

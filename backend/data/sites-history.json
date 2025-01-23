@@ -19,6 +19,17 @@
     "zhihu+http://zhihu.com+1",
     "baidu+http://baidu.com+1",
     "douyin+http://douyin.com+1",
-    "baidu+http://baidu.com+1"
+    "baidu+http://baidu.com+1",
+    "baidu+https://baidu.com/v1+1",
+    "baidu+https://baidu.com/v2+1",
+    "baidu+https://baidu.com/v3+1",
+    "zhihu+https://zhihu.com/v1+2",
+    "zhihu+https://zhihu.com/v2+2",
+    "zhihu+https://zhihu.com/v3+2",
+    "zhihu+https://zhihu.com/v4+2",
+    "douyin+https://douyin.com+3",
+    "douyin+https://douyin.com/v3+3",
+    "douyin+https://douyin.com/v2+3",
+    "douyin+https://douyin.com/v1+3"
   ]
 }

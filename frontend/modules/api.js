@@ -177,6 +177,15 @@ async function batchImportWebsites(websites, groupId) {
   return fetchDataFromApi('/websites/batchImportWebsites', 'POST', { websites, groupId });
 }
 
+/**
+ * 记录网站点击时间
+ * @param {string} websiteId - 网站ID
+ * @returns {Promise<any>} - 返回 Promise，解析为记录结果
+ */
+async function recordWebsiteClick(websiteId) {
+  return fetchDataFromApi('/analytics/click', 'POST', { websiteId });
+}
+
 export {
   fetchDataFromApi,
   getWebsites,
@@ -194,5 +203,6 @@ export {
   batchMoveWebsites,
   reorderGroups,
   moveToTrash,
-  batchImportWebsites
+  batchImportWebsites,
+  recordWebsiteClick
 };

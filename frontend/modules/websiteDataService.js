@@ -1,4 +1,4 @@
-import { createWebsite, updateWebsite, deleteWebsite, batchMoveWebsites, moveToTrash } from './api.js';
+import { createWebsite, updateWebsite, deleteWebsite, batchMoveWebsites, moveToTrash, recordWebsiteClick } from './api.js';
 import { showNotification } from './dashboardDataService.js';
 import { validateAndCompleteUrl } from './utils.js';
 
@@ -77,6 +77,21 @@ export class WebsiteSaveService {
     } catch (error) {
       console.error('Failed to move websites:', error);
       showNotification('移动网站失败，请重试', 'error');
+      throw error;
+    }
+  }
+
+  /**
+   * 记录网站点击时间
+   * @param {string} websiteId - 网站ID
+   * @returns {Promise} - 返回API调用结果
+   */
+  async recordWebsiteClick(websiteId) {
+    try {
+      const response = await recordWebsiteClick(websiteId);
+      return response;
+    } catch (error) {
+      console.error('Failed to record website click:', error);
       throw error;
     }
   }
