@@ -562,6 +562,55 @@ const _moveWebsitesToGroup = (websiteIds, targetGroupId, websites) => {
   });
 };
 
+/**
+ * @description 批量导入网站
+ * @param {Array} websites - 网站数据数组
+ * @param {string} groupId - 分组ID
+ */
+const batchImportWebsites = async (websites, groupId) => {
+  try {
+    // 创建备份
+    await syncService.backupData();
+    
+    // 读取现有数据
+    const data = await fileHandler.readData(WEBSITE_DATA_FILE_PATH);
+    
+    // 初始化数据对象如果不存在
+    if (!data.websites) data.websites = [];
+    if (!data.groups) data.groups = [];
+    
+    // 获取组内现有网站数量
+    const websitesInGroup = data.websites.filter(w => w.groupId === groupId);
+    const baseOrder = websitesInGroup.length;
+    
+    // 创建新的网站对象
+    const newWebsites = websites.map((website, index) => ({
+      id: uuidv4(),
+      groupId: groupId.toString(),
+      name: website.name || '',
+      url: website.url || '',
+      description: website.description || '',
+      faviconUrl: `/data/icons/Docker.png.ico`,
+      lastAccessTime: new Date(),
+      order: baseOrder + index + 1,
+      isAccessible: true
+    }));
+    
+    // 添加新网站
+    data.websites.push(...newWebsites);
+    
+    // 保存更新后的数据
+    await fileHandler.writeData(WEBSITE_DATA_FILE_PATH, data);
+    
+    return {
+      success: true,
+      count: newWebsites.length
+    };
+  } catch (error) {
+    handleServiceError(error, '批量导入网站失败');
+  }
+};
+
 module.exports = {
   getWebsitesByGroupId,
   getWebsiteById,
@@ -571,5 +620,6 @@ module.exports = {
   reorderWebsites,
   batchDeleteWebsites,
   batchMoveWebsites,
-  getAllWebsites
+  getAllWebsites,
+  batchImportWebsites
 };

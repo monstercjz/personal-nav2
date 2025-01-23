@@ -3,6 +3,7 @@ import { WebsiteSaveService } from './websiteDataService.js';
 import { fetchAndRenderGroupSelect } from './groupSelectDataService.js';
 import { getGroups, createGroup } from './api.js';
 import { showNotification } from './dashboardDataService.js';
+import { validateAndCompleteUrl } from './utils.js';
 export class WebsiteOperationService {
   constructor() {
     this.currentWebsiteId = null;
@@ -68,7 +69,9 @@ export class WebsiteOperationService {
           const newWebsiteDescription = modal.querySelector('#newWebsiteDescription').value;
           const newWebsiteGroup = modal.querySelector('#groupSelect').value;
           if (this.callback) {
-            await this.callback({ newWebsiteName, newWebsiteUrl, newWebsiteDescription, newWebsiteGroup });
+            const checknewWebsiteUrl = validateAndCompleteUrl(newWebsiteUrl);
+            console.log('checknewWebsiteUrl', checknewWebsiteUrl);//前端网址自动补全https://
+            await this.callback({ newWebsiteName, checknewWebsiteUrl, newWebsiteDescription, newWebsiteGroup });
           }
         } catch (error) {
           console.error('Failed to save website:', error);
@@ -114,14 +117,14 @@ export class WebsiteOperationService {
         newWebsiteDescription: websiteDescription,
         groupSelect: websiteGroupId
     });
-    const groupSelect = modal.querySelector('#groupSelect');
-    if (groupSelect) {
-        const option = document.createElement('option');
-        option.value = groupId;
-        option.textContent = groupId;
-        groupSelect.appendChild(option);
-        groupSelect.value = groupId;
-    }
+    // const groupSelect = modal.querySelector('groupSelect');// 删除了一个#在groupSelect前面
+    // if (groupSelect) {
+    //     const option = document.createElement('option');
+    //     option.value = groupId;
+    //     option.textContent = groupId;
+    //     groupSelect.appendChild(option);
+    //     groupSelect.value = groupId;
+    // }
   }
 
     getWebsiteInfo(websiteId) {

@@ -112,6 +112,21 @@ const batchMoveWebsites = async (req, res) => {
         apiResponse.error(res, error.message);
     }
 };
+
+/**
+ * @description 批量导入网站
+ */
+const batchImportWebsites = async (req, res) => {
+  try {
+    const { websites, groupId } = req.body;
+    const result = await websiteService.batchImportWebsites(websites, groupId);
+    await syncService.backupData(); // 调用备份函数
+    apiResponse.success(res, result);
+  } catch (error) {
+    apiResponse.error(res, error.message);
+  }
+};
+
 /**
  * @description 获取所有网站记录
  */
@@ -124,6 +139,7 @@ const getAllWebsites = async (req, res) => {
     apiResponse.error(res, error.message);
   }
 };
+
 module.exports = {
   getWebsitesByGroupId,
   createWebsite,
@@ -133,6 +149,6 @@ module.exports = {
   reorderWebsites,
   batchDeleteWebsites,
   batchMoveWebsites,
+  batchImportWebsites,
   getAllWebsites
 };
-

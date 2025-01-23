@@ -167,6 +167,16 @@ async function moveToTrash(websiteIds) {
   return fetchDataFromApi('/sync/moveToTrash', 'POST', { websiteIds });
 }
 
+/**
+ * 批量导入网站
+ * @param {Array} websites - 网站数据数组
+ * @param {string} groupId - 分组ID
+ * @returns {Promise<any>} - 返回 Promise，解析为导入结果
+ */
+async function batchImportWebsites(websites, groupId) {
+  return fetchDataFromApi('/websites/batchImportWebsites', 'POST', { websites, groupId });
+}
+
 export {
   fetchDataFromApi,
   getWebsites,
@@ -183,5 +193,6 @@ export {
   batchDeleteWebsites,
   batchMoveWebsites,
   reorderGroups,
-  moveToTrash
+  moveToTrash,
+  batchImportWebsites
 };

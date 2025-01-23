@@ -8,6 +8,7 @@ import { WebsiteOperationService } from './websiteOperationService.js';
 import { WebsiteSaveService } from './websiteDataService.js';
 import { confirmWebsiteDelete } from './websiteDeleteService.js';
 import { getGroups, createGroup } from './api.js';
+//import { ImportWebsiteService } from './importWebsiteService.js';
 
 let currentEditWebsiteGroupId = null;
 let currentEditWebsiteId = null;
@@ -34,11 +35,11 @@ export async function addWebsite() {
     try {
         await websiteOperationService.openWebsiteModal({
             mode: 'add',
-            callback: async ({ newWebsiteName, newWebsiteUrl, newWebsiteDescription, newWebsiteGroup }) => {
+            callback: async ({ newWebsiteName, checknewWebsiteUrl, newWebsiteDescription, newWebsiteGroup }) => {
                 const websiteSaveService = new WebsiteSaveService();
                 const result = await websiteSaveService.saveWebsite(null, {
                     name: newWebsiteName,
-                    url: newWebsiteUrl,
+                    url: checknewWebsiteUrl,
                     description: newWebsiteDescription
                 }, newWebsiteGroup);
                 if (result) {
@@ -112,139 +113,30 @@ export function getWebsiteInfo(websiteId) {
     return { websiteName, websiteUrl, websiteDescription, websiteGroupId };
 }
 
-// 保存网站
-export async function saveModalWebsite() {
-    hideContextMenu();
-    const groupId = currentEditWebsiteGroupId;
-    const websiteId = currentEditWebsiteId;
-    const modalId = 'editWebsiteModal';
-    openModal(modalId);
-    const modalEditWebsiteName = document.getElementById('modalEditWebsiteName').value;
-    let modalEditWebsiteUrl = document.getElementById('modalEditWebsiteUrl').value;
-    const modalEditWebsiteDescription = document.getElementById('modalEditWebsiteDescription').value;
-    const modalEditWebsiteGroup = document.getElementById('modalEditWebsiteGroup').value;
 
-    modalEditWebsiteUrl = validateAndCompleteUrl(modalEditWebsiteUrl);
-    if (!modalEditWebsiteUrl) {
-        return;
-    }
 
-    let updateGroupId = modalEditWebsiteGroup;
-    if (modalEditWebsiteGroup && parseInt(modalEditWebsiteGroup) !== parseInt(groupId)) {
-        updateGroupId = modalEditWebsiteGroup;
-    }
-    try {
-        const websiteSaveService = new WebsiteSaveService();
-        const result = await websiteSaveService.saveWebsite(websiteId, {
-            name: modalEditWebsiteName,
-            url: modalEditWebsiteUrl,
-            description: modalEditWebsiteDescription
-        });
-        if (result) {
-            const iconData = await fetchIcon(modalEditWebsiteUrl);
-            if (iconData) {
-                await websiteSaveService.saveWebsite(websiteId, {
-                    name: modalEditWebsiteName,
-                    url: modalEditWebsiteUrl,
-                    description: modalEditWebsiteDescription,
-                    iconPath: iconData.iconPath
-                });
-            }
-            renderDashboardWithData();
-            closeModal(modalId);
-        } else {
-            showNotification('更新网站失败', 'error');
-        }
-    } catch (error) {
-        console.error('Failed to save website:', error);
-        showNotification('更新网站失败', 'error');
-    }
-}
+import websiteImportModalHandler from './websiteImportModalHandler.js';
 
-/**
- * 打开导入网站模态框
- */
 export async function openImportWebsitesModal() {
-    const modalId = 'pasteWebsitesModal';
-    modalInteractionService.openModal(modalId);
-    document.querySelector('#pasteWebsitesModal textarea').focus();
-    const groupSelect = document.getElementById('pasteWebsitesGroupSelect');
-    if (!groupsData) {
-        await fetchAndRenderGroupSelect();
-    }
-    groupSelect.innerHTML = '<option value="">选择分组</option>';
-    const fragment = document.createDocumentFragment();
-    groupsData.groups.forEach(group => {
-        const option = document.createElement('option');
-        option.value = group.id;
-        option.textContent = group.name;
-        fragment.appendChild(option);
-    });
-    groupSelect.appendChild(fragment);
-}
-
-/**
- * 保存导入的网站
- */
-export async function saveImportedWebsites() {
-    const modalId = 'pasteWebsitesModal';
-    const websites = document.querySelector('#pasteWebsitesModal textarea').value.trim().split('\n').filter(line => line.trim() !== '');
-    if (websites.length === 0) {
-        showNotification('没有检测到网站', 'error');
-        closeModal(modalId);
-        return;
-    }
-    const selectedGroupId = document.getElementById('pasteWebsitesGroupSelect').value;
-    let groupId = selectedGroupId;
-    let newGroup;
-    if (!groupId) {
-        const now = new Date();
-        const groupName = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`;
-        try {
-            const createGroupResponse = await fetch(`${backendUrl}/groups`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name: groupName })
-            });
-            if (!createGroupResponse.ok) {
-                showNotification('创建分组失败', 'error');
-                closeModal(modalId);
-                return;
-            }
-            newGroup = await createGroupResponse.json();
-            groupId = newGroup.id;
-        } catch (error) {
-            console.error('Failed to create group:', error);
-            showNotification('创建分组失败', 'error');
-            closeModal(modalId);
-            return;
-        }
-    }
-    try {
+  try {
+    await websiteImportModalHandler.showImportModal(
+      async (websites, groupId) => {
         const websiteSaveService = new WebsiteSaveService();
-        for (const line of websites) {
-            const parts = line.split('+').map(item => item.trim());
-            if (parts.length >= 2) {
-                const name = parts[0];
-                const url = parts[1];
-                const description = parts[2] || '';
-                const validatedUrl = validateAndCompleteUrl(url);
-                 if (validatedUrl) {
-                    await websiteSaveService.saveWebsite(null, {
-                        name: name,
-                        url: validatedUrl,
-                        description: description
-                    }, groupId);
-                }
-            }
+        const result = await websiteSaveService.importWebsites(websites, groupId);
+        
+        if (result.success) {
+          showNotification(`成功导入${result.count}个网站`, 'success');
+          renderDashboardWithData();
+        } else {
+          showNotification(result.message || '网站导入失败', 'error');
         }
-        showNotification('网站导入成功', 'success');
-        renderDashboardWithData();
-        closeModal(modalId);
-    } catch (error) {
-        console.error('Failed to import websites:', error);
-        showNotification('网站导入失败', 'error');
-        closeModal(modalId);
-    }
+      },
+      () => {
+        showNotification('导入已取消', 'info');
+      }
+    );
+  } catch (error) {
+    console.error('Failed to open import websites modal:', error);
+    showNotification('打开导入界面失败', 'error');
+  }
 }
-

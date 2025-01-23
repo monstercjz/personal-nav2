@@ -1,5 +1,6 @@
 import { createWebsite, updateWebsite, deleteWebsite, batchMoveWebsites, moveToTrash } from './api.js';
 import { showNotification } from './dashboardDataService.js';
+import { validateAndCompleteUrl } from './utils.js';
 
 export class WebsiteSaveService {
   async saveWebsite(websiteId, websiteData, groupId) {
@@ -20,7 +21,8 @@ export class WebsiteSaveService {
                     console.log('defaultGroup:', defaultGroup);
                 }
                 if (!defaultGroup) {
-                    const newGroup = await createGroup({ name: 'Default',isCollapsible: false });
+                    const groupName = new Date().toLocaleString();
+                    const newGroup = await createGroup({ name: groupName, isCollapsible: false });
                     actualGroupId = newGroup.id;
                 } else {
                     actualGroupId = defaultGroup.id;
@@ -67,15 +69,99 @@ export class WebsiteSaveService {
     }
   }
 
-    async moveWebsites(websiteIds, groupId) {
-        try {
-            const response = await batchMoveWebsites(websiteIds, groupId);
-            showNotification('网站移动成功', 'success');
-            return response;
-        } catch (error) {
-            console.error('Failed to move websites:', error);
-            showNotification('移动网站失败，请重试', 'error');
-            throw error;
-        }
+  async moveWebsites(websiteIds, groupId) {
+    try {
+      const response = await batchMoveWebsites(websiteIds, groupId);
+      showNotification('网站移动成功', 'success');
+      return response;
+    } catch (error) {
+      console.error('Failed to move websites:', error);
+      showNotification('移动网站失败，请重试', 'error');
+      throw error;
     }
+  }
+
+  /**
+   * 解析导入的网站数据
+   * @param {string} rawData - 原始数据
+   * @returns {Array} 解析后的网站对象数组
+   */
+  parseImportedWebsites(rawData) {
+    return rawData.split('\n')
+      .filter(line => line.trim() !== '')
+      .map(line => {
+        const parts = line.split('+').map(item => item.trim());
+        return {
+          name: parts[0] || '',
+          url: parts[1] || '',
+          description: parts[2] || ''
+        };
+      });
+  }
+
+  /**
+   * 验证网站数据
+   * @param {Array} websites - 网站数据数组
+   * @returns {boolean} 是否包含有效数据
+   */
+  validateImportedWebsites(websites) {
+    return websites.length > 0;
+  }
+
+  /**
+   * 导入网站
+   * @param {string} rawData - 原始数据
+   * @param {string} groupId - 分组ID
+   * @returns {Object} 导入结果
+   */
+  async importWebsites(rawData, groupId) {
+    try {
+      const websites = this.parseImportedWebsites(rawData);
+      
+      if (!this.validateImportedWebsites(websites)) {
+        return {
+          success: false,
+          message: '没有检测到有效的网站数据'
+        };
+      }
+
+      // Validate and complete URLs
+      const validatedWebsites = websites.map(website => {
+        const validatedUrl = validateAndCompleteUrl(website.url);
+        return validatedUrl ? {
+          name: website.name,
+          url: validatedUrl,
+          description: website.description
+        } : null;
+      }).filter(Boolean);
+
+      if (validatedWebsites.length === 0) {
+        return {
+          success: false,
+          message: '没有有效的URL'
+        };
+      }
+
+      let actualGroupId = groupId;
+      if (!actualGroupId) {
+        const { getGroups, createGroup } = await import('./api.js');
+        const groups = await getGroups();
+        const groupName = new Date().toLocaleString();
+        const newGroup = await createGroup({ name: groupName, isCollapsible: false });
+        actualGroupId = newGroup.id;
+      }
+
+      const { batchImportWebsites } = await import('./api.js');
+      const result = await batchImportWebsites(validatedWebsites, actualGroupId);
+      
+      return {
+        success: result.success,
+        count: result.count,
+        message: result.success ? null : '导入网站失败'
+      };
+    } catch (error) {
+      console.error('Failed to import websites:', error);
+      throw error;
+    }
+  }
 }

@@ -2,6 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const syncController = require('../controllers/syncController');
+const websiteController = require('../controllers/websiteController');
 
 /**
  * @route GET /export
@@ -24,5 +25,7 @@ router.post('/history/restore', syncController.restoreData);
  * @body {websiteIds: string[]}
  */
 router.post('/moveToTrash', syncController.moveToTrash);
+
+
 
 module.exports = router;

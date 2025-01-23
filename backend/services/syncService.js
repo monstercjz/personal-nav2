@@ -1,5 +1,6 @@
 // backend/services/syncService.js
 const fileHandler = require('../utils/fileHandler');
+const { v4: uuidv4 } = require('uuid');
 
 const { WEBSITE_DATA_FILE_PATH } = require('../config/constants');
 const { HISTORY_DATA_FILE_PATH } = require('../config/constants');
@@ -10,18 +11,20 @@ const ARCHIVE_SUCCESS_MESSAGE = 'Websites info archived successfully';
  */
 const exportData = async () => {
   const data = await fileHandler.readData(WEBSITE_DATA_FILE_PATH);
-  return data;
+  console.log('Websites info exported successfully',data);
+  return {
+    groups: data.groups,
+    websites: data.websites,
+    nextGroupId: data.nextGroupId,
+    nextWebsiteId: data.nextWebsiteId,
+  };
 };
 
 /**
  *  @description 导入数据
  */
 const importData = async (importData) => {
-    const data = await fileHandler.readData(WEBSITE_DATA_FILE_PATH);
-    const historyData = await fileHandler.readData(historyFilePath);
-    const versionId = new Date().toISOString();
-    historyData.versions = [...(historyData.versions || []), { versionId, data }];
-    await fileHandler.writeData(historyFilePath, historyData);
+    await backupData();
     await fileHandler.writeData(WEBSITE_DATA_FILE_PATH, importData);
 };
 
@@ -129,28 +132,45 @@ const backupData = async () => {
 const cleanupOldBackups = async () => {
   try {
     const files = await fs.readdir(BACKUP_DIR);
-    const backupFiles = files.filter(file => file.startsWith('sites-data-backup-') && file.endsWith('.json'));
-
-    if (backupFiles.length > MAX_BACKUP_VERSIONS) {
-      backupFiles.sort(); // 默认升序，时间戳越早的文件排在前面
-      const filesToDelete = backupFiles.slice(0, backupFiles.length - MAX_BACKUP_VERSIONS); // 删除较旧的文件
-
-      for (const file of filesToDelete) {
+    const backupFiles = files
+      .filter(file => file.startsWith('sites-data-backup-') && file.endsWith('.json'))
+      .map(file => {
         const filePath = path.join(BACKUP_DIR, file);
-        await fs.unlink(filePath);
-        console.log(`Deleted old backup file: ${file}`);
-      }
+        return { 
+          name: file,
+          path: filePath,
+          time: fs.statSync(filePath).mtime.getTime()
+        };
+      });
+
+    const now = Date.now();
+    const FIVE_MINUTES = 5 * 60 * 1000;
+    
+    // Keep all backups from last 5 minutes
+    const recentBackups = backupFiles.filter(f => now - f.time < FIVE_MINUTES);
+    
+    // For older backups, keep only latest 5
+    const oldBackups = backupFiles
+      .filter(f => now - f.time >= FIVE_MINUTES)
+      .sort((a, b) => b.time - a.time) // Sort newest first
+      .slice(MAX_BACKUP_VERSIONS); // Keep only latest 5
+
+    // Files to delete are old backups beyond the limit
+    const filesToDelete = oldBackups;
+
+    for (const file of filesToDelete) {
+      await fs.unlink(file.path);
+      console.log(`Deleted old backup file: ${file.name}`);
     }
   } catch (error) {
     console.error('Error cleaning up old backups:', error);
   }
 };
 
-
 module.exports = {
   exportData,
   importData,
   restoreData,
   moveToTrash,
-  backupData // 导出备份函数
+  backupData
 };

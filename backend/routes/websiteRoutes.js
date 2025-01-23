@@ -43,7 +43,12 @@ router.put('/:websiteId', websiteController.updateWebsite);
  * @description 删除网站记录
  */
 router.delete('/:websiteId', websiteController.deleteWebsite);
-
+/**
+ * @route POST /batchImportWebsites
+ * @description 批量导入网站
+ * @body {websites: Array, groupId: string}
+ */
+router.post('/batchImportWebsites', websiteController.batchImportWebsites);//虽然挂载在sync路由下，但是这个路由是websiteController下的路由
 
 
 module.exports = router;

@@ -19,7 +19,7 @@ import {
 // 渲染分组下拉框
 export function renderGroupSelect(data) {
     const groupSelect = document.getElementById('groupSelect');
-    groupSelect.innerHTML = '<option value="">Select Group</option>';
+    groupSelect.innerHTML = '<option value="">选择分组</option>';
     const fragment = document.createDocumentFragment();
     data.groups.forEach(group => {
         const option = document.createElement('option');

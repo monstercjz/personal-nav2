@@ -15,8 +15,8 @@ export async function importData() {
         reader.onload = async (event) => {
             try {
                 const jsonData = JSON.parse(event.target.result);
-                const response = await fetch(`${backendUrl}/data`, {
-                    method: 'PUT',
+                const response = await fetch(`${backendUrl}/sync/import`, {
+                    method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(jsonData),
                 });
@@ -41,15 +41,18 @@ export async function importData() {
  */
 export async function exportData() {
     try {
-        const response = await fetch(`${backendUrl}/data`);
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-        const { websites, groups, order } = await response.json();
-         const jsonString = JSON.stringify({ websites, groups, order }, null, 2);
+        const response = await fetch(`${backendUrl}/sync/export`);
+        const responseexportdatas = await response.json();
+        if (!responseexportdatas.success) throw new Error(`HTTP error! status: ${response.status}`);
+        console.log('responseexportdata', responseexportdatas);
+        const responseexportdata = responseexportdatas.data;
+        const { websites, groups, nextGroupId, nextWebsiteId } = responseexportdata;
+        const jsonString = JSON.stringify({ websites, groups, nextGroupId, nextWebsiteId }, null, 2);
         const blob = new Blob([jsonString], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'data.json';
+        a.download = 'sites-data.json';
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
