@@ -59,11 +59,11 @@ export async function editWebsite(groupId, websiteId) {
         mode: 'edit',
         websiteId: websiteId,
         groupId: groupId,
-        callback: async ({ newWebsiteName, newWebsiteUrl, newWebsiteDescription, newWebsiteGroup }) => {
+        callback: async ({ newWebsiteName, checknewWebsiteUrl, newWebsiteDescription, newWebsiteGroup }) => {
             const websiteSaveService = new WebsiteSaveService();
             const result = await websiteSaveService.saveWebsite(websiteId, {
                 name: newWebsiteName,
-                url: newWebsiteUrl,
+                url: checknewWebsiteUrl,
                 description: newWebsiteDescription
             }, newWebsiteGroup);
             if (result) {
