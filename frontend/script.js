@@ -89,7 +89,27 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // 添加切换添加按钮点击事件监听器
     toggleAddButtons.addEventListener('click', () => {
-        addButtons.style.display = addButtons.style.display === 'none' ? 'flex' : 'none';
+        const buttons = addButtons.querySelectorAll('.icon-button');
+        if (addButtons.classList.contains('show')) {
+            addButtons.classList.remove('show');
+            // 关闭时反向设置延迟
+            buttons.forEach((btn, index) => {
+                btn.style.transitionDelay = `${50 * (buttons.length - index - 1)}ms`;
+            });
+        } else {
+            addButtons.classList.add('show');
+            // 添加按钮显示动画效果
+            buttons.forEach((btn, index) => {
+                btn.style.transitionDelay = `${50 * index}ms`;
+            });
+        }
+
+        // 300ms后重置所有transition-delay
+        setTimeout(() => {
+            buttons.forEach(btn => {
+                btn.style.transitionDelay = '';
+            });
+        }, 300);
     });
 
     // 添加添加分组按钮点击事件监听器

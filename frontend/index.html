@@ -21,7 +21,7 @@
         </div>
         <input type="search" class="search-input" id="search-input" placeholder="搜索网站名称或网址..." aria-label="搜索网站" writingsuggestions="off">
       </div>
-    <div class="add-buttons" style="display:none;">
+    <div class="add-buttons">
 <button id="showAddGroup" class="icon-button" aria-label="添加分组" data-tooltip="添加分组">
   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
     <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
@@ -58,7 +58,6 @@
         <path d="M3 3h18v2H3z"/>
     </svg>
 </button>
-</button>
     </div>
     <div class="add-button-container">
         <button id="toggleAddButtons" type="button" aria-label="切换添加按钮" data-tooltip="切换添加按钮">
@@ -71,7 +70,7 @@
     <main id="dashboard">
         <!-- Groups will be rendered here -->
     </main>
-    <div id="tooltip" style="display: none; position: absolute; z-index: 1000;"></div>
+    <div id="tooltip"></div>
     <script src="script.js" type="module"></script>
 </body>
 </html>
