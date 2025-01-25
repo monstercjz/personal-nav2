@@ -81,8 +81,10 @@ function renderDashboard({ websites, groups }) {
             websiteItem.setAttribute('data-description', website.description);
             websiteItem.setAttribute('data-website-id', website.id);
             websiteItem.setAttribute('data-group-id', website.groupId);
+            // style="width: 20px; height: 20px; margin-right: 3px;"移除img内联样式，改用css样式
             websiteItem.innerHTML = `
-                ${website.faviconUrl ? `<img src="${backendUrl}${website.faviconUrl}" title="${website.name}" style="width: 16px; height: 16px; margin-right: 3px;">` : ''}
+                
+                ${website.faviconUrl ? `<img src="${backendUrl}${website.faviconUrl}" title="${website.name}" style="margin-right: 3px;">` : ''}
                 <a href="${website.url}" target="_blank">${website.name}</a>
                 <span style="display:none;">${website.faviconUrl}</span>
             `;
